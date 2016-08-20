@@ -1,0 +1,32 @@
+{
+  "name": "millwright",
+  "description": "A ridiculously simple static site generator with CMS support.",
+  "version": "0.1.1",
+  "homepage": "https://millwrightjs.com",
+  "repository": "millwrightjs/millwright",
+  "author": "Shawn Erquhart (https://github.com/erquhart)",
+  "files": [
+    "bin",
+    "lib"
+  ],
+  "bin": {
+    "mill": "./bin/mill.js"
+  },
+  "dependencies": {
+    "contentful": "^3.5.0",
+    "csso": "^2.2.1",
+    "ecstatic": "^2.1.0",
+    "fs-extra": "^0.30.0",
+    "marked": "^0.3.6",
+    "moment": "^2.14.1",
+    "mustache": "^2.2.1",
+    "node-sass": "^3.8.0",
+    "open": "0.0.5",
+    "uglify-js": "^2.7.3",
+    "yargs": "^5.0.0"
+  },
+  "engines": {
+    "node": ">= 4.0"
+  },
+  "license": "MIT"
+}
