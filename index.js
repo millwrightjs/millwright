@@ -4,13 +4,16 @@ const fs = require('fs-extra');
 const path = require('path');
 const http = require('http');
 const open = require('open');
+const attempt = require('./lib/util/attempt');
 const ecstatic = require('ecstatic');
 const contentful = require('contentful');
 
-const config = fs.readJsonSync(path.join(process.cwd(), 'millwright.json'));
+const configPath = path.join(process.cwd(), 'millwright.json');
+const config = attempt(fs.readJsonSync, configPath);
+
 const cleanDirs = ['dest'];
 const scriptsDir = path.join(__dirname, 'lib');
-const contentfulKeys = config.contentful;
+const contentfulKeys = _.get(config, 'contentful');
 const serveRoot = 'dest';
 const servePort = 8080;
 const servePath = 'http://localhost:8080'
@@ -46,9 +49,12 @@ function clean() {
 }
 
 function build() {
-  return contentful.createClient(contentfulKeys).getEntries().then(entries => {
-    return mill.pages(_.assign(mill.templateDeps(), mill.parseContent(entries.items)));
-  });
+  if (contentfulKeys) {
+    return contentful.createClient(contentfulKeys).getEntries().then(entries => {
+      return mill.pages(_.assign(mill.templateDeps(), mill.parseContent(entries.items)));
+    });
+  }
+  return Promise.resolve(mill.pages(mill.templateDeps()));
 }
 
 function dev() {
