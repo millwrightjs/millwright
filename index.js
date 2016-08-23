@@ -49,6 +49,7 @@ function clean() {
 }
 
 function build() {
+  mill.clean();
   if (contentfulKeys) {
     return contentful.createClient(contentfulKeys).getEntries().then(entries => {
       return mill.pages(_.assign(mill.templateDeps(), mill.parseContent(entries.items)));

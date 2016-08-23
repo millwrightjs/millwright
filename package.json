@@ -19,6 +19,7 @@
     "mustache": "^2.2.1",
     "node-sass": "^3.8.0",
     "open": "0.0.5",
+    "path-exists": "^3.0.0",
     "uglify-js": "^2.7.3",
     "yargs": "^5.0.0"
   },
