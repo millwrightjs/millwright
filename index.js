@@ -1,15 +1,14 @@
-const _ = require('lodash');
+const _ = require('./lib/util/lodash-extended');
 const argv = require('yargs').argv;
 const fs = require('fs-extra');
 const path = require('path');
 const http = require('http');
 const open = require('open');
-const attempt = require('./lib/util/attempt');
 const ecstatic = require('ecstatic');
 const contentful = require('contentful');
 
 const configPath = path.join(process.cwd(), 'millwright.json');
-const config = attempt(fs.readJsonSync, configPath);
+const config = _.attemptSilent(fs.readJsonSync, configPath);
 
 const cleanDirs = ['dest'];
 const scriptsDir = path.join(__dirname, 'lib');
