@@ -47,18 +47,22 @@ function clean() {
   cleanDirs.forEach(dir => fs.removeSync(dir));
 }
 
+function dev() {
+  make().then(() => mill.serve());
+}
+
 function build() {
+  make(true);
+}
+
+function make(optimize) {
   mill.clean();
   if (contentfulKeys) {
     return contentful.createClient(contentfulKeys).getEntries().then(entries => {
-      return mill.pages(_.assign(mill.templateDeps(), mill.parseContent(entries.items)));
+      return mill.pages(_.assign(mill.templateDeps(optimize), mill.parseContent(entries.items)));
     });
   }
-  return Promise.resolve(mill.pages(mill.templateDeps()));
-}
-
-function dev() {
-  mill.build().then(() => mill.serve());
+  return Promise.resolve(mill.pages(mill.templateDeps(optimize)));
 }
 
 function serve() {
