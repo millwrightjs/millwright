@@ -24,6 +24,7 @@ const mill = {
   parseContent: requireBuildScript('parse-content'),
   pages: requireBuildScript('pages'),
   clean,
+  make,
   build,
   dev,
   serve
