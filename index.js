@@ -62,10 +62,10 @@ function make(optimize) {
   mill.clean();
   if (contentfulKeys) {
     return contentful.createClient(contentfulKeys).getEntries().then(entries => {
-      return mill.pages(_.assign(mill.templateDeps(assets), mill.parseContent(entries.items)));
+      return mill.pages(_.assign(mill.templateDeps(assets, optimize), mill.parseContent(entries.items)));
     });
   }
-  return Promise.resolve(mill.pages(mill.templateDeps(assets)));
+  return Promise.resolve(mill.pages(mill.templateDeps(assets, optimize)));
 }
 
 function serve() {
