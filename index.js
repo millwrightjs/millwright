@@ -18,6 +18,7 @@ const servePort = 8080;
 const servePath = 'http://localhost:8080'
 const serveMsg = 'Millwright serving at ' + servePath + '...';
 const defaultCommand = 'dev';
+const normalize = requireBuildScript('normalize');
 
 const mill = {
   templateDeps: requireBuildScript('template-deps'),
@@ -57,13 +58,14 @@ function build() {
 }
 
 function make(optimize) {
+  const assets = normalize();
   mill.clean();
   if (contentfulKeys) {
     return contentful.createClient(contentfulKeys).getEntries().then(entries => {
-      return mill.pages(_.assign(mill.templateDeps(optimize), mill.parseContent(entries.items)));
+      return mill.pages(_.assign(mill.templateDeps(assets), mill.parseContent(entries.items)));
     });
   }
-  return Promise.resolve(mill.pages(mill.templateDeps(optimize)));
+  return Promise.resolve(mill.pages(mill.templateDeps(assets)));
 }
 
 function serve() {
