@@ -58,14 +58,17 @@ function build() {
 }
 
 function make(optimize) {
-  const assets = normalize();
+  const {assets, webPaths} = normalize();
   mill.clean();
   if (contentfulKeys) {
-    return contentful.createClient(contentfulKeys).getEntries().then(entries => {
-      return mill.pages(_.assign(mill.templateDeps(assets, optimize), mill.parseContent(entries.items)));
+    const request = contentful.createClient(contentfulKeys).getEntries().then(entries => {
+      return mill.pages(_.assign(webPaths, mill.parseContent(entries.items)));
     });
+    mill.templateDeps(assets, optimize);
+    return request;
   }
-  return Promise.resolve(mill.pages(mill.templateDeps(assets, optimize)));
+  mill.templateDeps(assets, optimize);
+  return Promise.resolve(mill.pages(webPaths));
 }
 
 function serve() {
