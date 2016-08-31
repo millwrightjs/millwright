@@ -28,6 +28,7 @@ const mill = {
   make,
   build,
   dev,
+  preview,
   serve
 };
 
@@ -53,12 +54,16 @@ function dev() {
   make().then(() => mill.serve());
 }
 
+function preview() {
+  build().then(() => mill.serve());
+}
+
 function build() {
-  make(true);
+  return make(true);
 }
 
 function make(optimize) {
-  const {assets, webPaths} = normalize();
+  const {assets, webPaths} = normalize(optimize);
   mill.clean();
   if (contentfulKeys) {
     const request = contentful.createClient(contentfulKeys).getEntries().then(entries => {
