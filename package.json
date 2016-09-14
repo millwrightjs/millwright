@@ -10,7 +10,6 @@
     "lib"
   ],
   "dependencies": {
-    "autoprefixer": "^6.4.0",
     "contentful": "^3.5.0",
     "csso": "^2.2.1",
     "ecstatic": "^2.1.0",
@@ -22,6 +21,7 @@
     "open": "0.0.5",
     "path-exists": "^3.0.0",
     "postcss": "^5.1.2",
+    "postcss-cssnext": "^2.8.0",
     "uglify-js": "^2.7.3",
     "yargs": "^5.0.0"
   },
