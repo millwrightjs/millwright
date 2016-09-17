@@ -22,6 +22,7 @@
     "path-exists": "^3.0.0",
     "postcss": "^5.1.2",
     "postcss-cssnext": "^2.8.0",
+    "promisify-node": "^0.4.0",
     "uglify-js": "^2.7.3",
     "yargs": "^5.0.0"
   },

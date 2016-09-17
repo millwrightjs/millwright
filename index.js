@@ -69,11 +69,11 @@ function make(optimize) {
     const request = contentful.createClient(contentfulKeys).getEntries().then(entries => {
       return mill.pages(_.assign(webPaths, mill.parseContent(entries.items)));
     });
-    mill.templateDeps(assets, optimize);
-    return request;
+    const templatePromise = mill.templateDeps(assets, optimize);
+    return Promise.all([templatePromise, request]);
   }
-  mill.templateDeps(assets, optimize);
-  return Promise.resolve(mill.pages(webPaths));
+  mill.pages(webPaths);
+  return mill.templateDeps(assets, optimize);
 }
 
 function serve() {
