@@ -37,12 +37,16 @@ const cmd = argv._[0];
 module.exports = runMill;
 
 function runMill(cmd) {
-  if (!cmd) {
-    mill[defaultCommand]();
-  } else if (_.isString(cmd) && mill[cmd]) {
-    mill[cmd]();
-  } else if (_.isString(cmd)) {
-    console.log('mill: "' + cmd + '" is not a recognized command.');
+  try {
+    if (!cmd) {
+      mill[defaultCommand]();
+    } else if (_.isString(cmd) && mill[cmd]) {
+      mill[cmd]();
+    } else if (_.isString(cmd)) {
+      console.log('mill: "' + cmd + '" is not a recognized command.');
+    }
+  } catch (err) {
+    console.error(err);
   }
 }
 
