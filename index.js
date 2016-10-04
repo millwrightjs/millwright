@@ -63,7 +63,8 @@ function build() {
 }
 
 function make(optimize) {
-  const {assets, webPaths} = normalize(optimize);
+  const assets = fs.readJsonSync('src/wrapper.json');
+  const normalized = _.map(assets, normalize);
   mill.clean();
   if (contentfulKeys) {
     const request = contentful.createClient(contentfulKeys).getEntries().then(entries => {
