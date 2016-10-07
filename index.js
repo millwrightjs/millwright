@@ -18,10 +18,11 @@ const servePort = 8080;
 const servePath = 'http://localhost:8080'
 const serveMsg = 'Millwright serving at ' + servePath + '...';
 const defaultCommand = 'dev';
-const normalize = requireBuildScript('normalize');
+const normalizeToObjects = requireBuildScript('normalize-to-objects');
+const normalizePaths = requireBuildScript('normalize-paths');
+const normalizeGroups = requireBuildScript('normalize-groups');
 
 const mill = {
-  templateDeps: requireBuildScript('template-deps'),
   parseContent: requireBuildScript('parse-content'),
   pages: requireBuildScript('pages'),
   clean,
@@ -64,7 +65,36 @@ function build() {
 
 function make(optimize) {
   const assets = fs.readJsonSync('src/wrapper.json');
-  const normalized = _.map(assets, normalize);
+  const normalizedAssets = _(assets)
+    .mapValues(normalizeToObjects)
+    .mapValues(normalizePaths)
+    .mapValues(normalizeGroups);
+
+  const fileInfo = {
+    files: normalizedAssets,
+    templatePaths: {}
+  };
+
+  // templatePaths needs to have the keys from fileInfo.files, with the value of each being an array
+  // of one or more paths for use in the template.
+  //
+  // {
+  //   files: {...},
+  //   templatePaths: {
+  //     styles: ['styles.min.css']
+  //
+  //     -- or for dev --
+  //
+  //     scripts: [
+  //       'script1.js',
+  //       'script2.js'
+  //     ]
+  //
+  //     -- or it could even be individual minified scripts if concatenation is off (via plugin
+  //     disabled) --
+  //   }
+  // }
+
   mill.clean();
   if (contentfulKeys) {
     const request = contentful.createClient(contentfulKeys).getEntries().then(entries => {
