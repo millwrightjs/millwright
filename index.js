@@ -68,12 +68,15 @@ function make(optimize) {
   const normalizedAssets = _(assets)
     .mapValues(normalizeToObjects)
     .mapValues(normalizePaths)
-    .mapValues(normalizeGroups);
+    .mapValues(normalizeGroups)
+    .value();
 
   const fileInfo = {
     files: normalizedAssets,
     templatePaths: {}
   };
+
+  _.logObject(fileInfo);
 
   // templatePaths needs to have the keys from fileInfo.files, with the value of each being an array
   // of one or more paths for use in the template.
