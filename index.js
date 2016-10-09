@@ -21,6 +21,8 @@ const defaultCommand = 'dev';
 const normalizeToObjects = requireBuildScript('normalize-to-objects');
 const normalizePaths = requireBuildScript('normalize-paths');
 const normalizeGroups = requireBuildScript('normalize-groups');
+const read = requireBuildScript('plugins/read');
+const compile = requireBuildScript('plugins/compile');
 
 const mill = {
   parseContent: requireBuildScript('parse-content'),
@@ -64,19 +66,21 @@ function build() {
 }
 
 function make(optimize) {
-  const assets = fs.readJsonSync('src/wrapper.json');
-  const normalizedAssets = _(assets)
+  const fileGroups = fs.readJsonSync('src/wrapper.json');
+  const normalizedGroups = _(fileGroups)
     .mapValues(normalizeToObjects)
     .mapValues(normalizePaths)
     .mapValues(normalizeGroups)
+    .mapValuesWhen('allFiles', group => {
+      const files = _(group.files)
+        .map(read)
+        .mapAsyncWhen('shouldCompile', compile)
+        .value();
+
+      return Promise.all(files).then(result => _.assign(group, {files: result}));
+    })
+    .mapValues(group => Promise.resolve(group))
     .value();
-
-  const fileInfo = {
-    files: normalizedAssets,
-    templatePaths: {}
-  };
-
-  _.logObject(fileInfo);
 
   // templatePaths needs to have the keys from fileInfo.files, with the value of each being an array
   // of one or more paths for use in the template.
@@ -98,6 +102,7 @@ function make(optimize) {
   //   }
   // }
 
+  /*
   mill.clean();
   if (contentfulKeys) {
     const request = contentful.createClient(contentfulKeys).getEntries().then(entries => {
@@ -108,6 +113,7 @@ function make(optimize) {
   }
   mill.pages(webPaths);
   return mill.templateDeps(assets, optimize);
+ */
 }
 
 function serve() {
