@@ -7,105 +7,64 @@ const open = require('open');
 const ecstatic = require('ecstatic');
 const contentful = require('contentful');
 
-const configPath = path.join(process.cwd(), 'millwright.json');
-const config = _.attemptSilent(fs.readJsonSync, configPath);
+require('app-module-path').addPath(path.join(__dirname, 'lib'));
+const requireDir = require('require-dir');
 
-const cleanDirs = ['dest'];
-const scriptsDir = path.join(__dirname, 'lib');
-const contentfulKeys = _.get(config, 'contentful');
-const serveRoot = 'dest';
-const servePort = 8080;
-const servePath = 'http://localhost:8080'
-const serveMsg = 'Millwright serving at ' + servePath + '...';
-const defaultCommand = 'dev';
-const normalizeToObjects = requireBuildScript('normalize-to-objects');
-const normalizePaths = requireBuildScript('normalize-paths');
-const normalizePathPipelines = requireBuildScript('normalize-path-pipelines');
-const normalizeGroups = requireBuildScript('normalize-groups');
-const read = requireBuildScript('plugins/read');
-const compile = requireBuildScript('plugins/compile');
-const postProcess = requireBuildScript('plugins/post-process');
-const output = requireBuildScript('plugins/output');
-const copy = requireBuildScript('plugins/copy');
-const toWebPath = requireBuildScript('plugins/to-web-path');
+const lib = requireDir('./lib', {camelcase: true});
+const plugins = requireDir('./lib/plugins', {camelcase: true});
+const config = require('./config');
 
-const mill = {
-  parseContent: requireBuildScript('parse-content'),
-  pages: requireBuildScript('pages'),
-  clean,
-  make,
-  build,
-  dev,
-  preview,
-  serve
-};
-
+const mill = {parseContent, pages, clean, make, build, dev, preview, serve};
 const cmd = argv._[0];
 
 module.exports = runMill;
 
 function runMill(cmd) {
-  if (!cmd) {
-    mill[defaultCommand]();
-  } else if (_.isString(cmd) && mill[cmd]) {
-    mill[cmd]();
-  } else if (_.isString(cmd)) {
-    console.log('mill: "' + cmd + '" is not a recognized command.');
-  }
+  cmd = cmd || config.defaultCommand;
+  mill[cmd]();
+}
+
+function parseContent(...args) {
+  return lib.parseContent(...args);
+}
+
+function pages(...args) {
+  return lib.pages(...args);
 }
 
 function clean() {
-  cleanDirs.forEach(dir => fs.removeSync(dir));
+  fs.removeSync(config.destBase);
 }
 
 function dev() {
-  make().then(() => mill.serve());
+  make().then(mill.serve);
 }
 
 function preview() {
-  build().then(() => mill.serve());
+  build().then(mill.serve);
 }
 
 function build() {
-  return make(true);
+  return make();
 }
 
-function make(optimize) {
+function make() {
   mill.clean();
 
-  const assetGroups = fs.readJsonSync('src/wrapper.json');
-  const assets = {};
-
-  assets.groups = _(assetGroups)
-    .mapValues(normalizeToObjects)
-    .mapValues(normalizePaths)
-    .mapValues(normalizePathPipelines)
-    .mapValues(normalizeGroups)
-    .mapValues(group => _(group.files)
-      .mapWhenElse('isFile', read, (val) => Promise.resolve(val))
-      .mapAsyncWhen(['isFile', 'shouldCompile'], compile)
-      .mapAsyncWhen(['isFile', 'shouldPostProcess'], postProcess)
-      .mapAsyncWhenElse('content', output, copy)
-      .mapAsyncWhen('webPath', toWebPath)
-      .thru(val => Promise.all(val))
-      .value()
-    )
-    .toPairs()
-    .unzip()
+  const assetGroupPaths = fs.readJsonSync('src/wrapper.json');
+  const assetGroups = _(assetGroupPaths)
+    .thru(normalize)
+    .mapValues(generateAssets)
+    .resolveAsyncObject()
     .value();
-
-  const assetGroupKeys = assets.groups[0];
-  const assetGroupValues = assets.groups[1];
 
   // TODO: We're waiting to compile the views, including initializing the CMS get request, until
   // asset processing is complete. The two should be happening simultaneously.
 
-  return Promise.all(assetGroupValues)
-    .then(result => assets.groups = _.zipObject(assetGroupKeys, result))
-    .then(result => getViews(contentfulKeys, result));
+  return assetGroups.then(result => getViews(config.contentful, result));
 
   function getViews(keys, assetPaths) {
-    return contentfulKeys ? getContent(keys, assetPaths) : mill.pages(assetPaths);
+    return keys ? getContent(keys, assetPaths) : mill.pages(assetPaths);
   }
 
   function getContent(keys, assetPaths) {
@@ -115,12 +74,28 @@ function make(optimize) {
   }
 }
 
-function serve() {
-  http.createServer(ecstatic(serveRoot)).listen(servePort);
-  console.log(serveMsg);
-  open(servePath);
+function normalize(assetGroupPaths) {
+  return _(assetGroupPaths)
+    .mapValues(lib.normalizeToObjects)
+    .mapValues(lib.normalizePaths)
+    .mapValues(lib.normalizePathPipelines)
+    .mapValues(lib.normalizeGroups)
+    .value();
 }
 
-function requireBuildScript(scriptName) {
-  return require(path.resolve(scriptsDir, scriptName + '.js'));
+function generateAssets(group) {
+  return _(group.files)
+    .mapWhenElse('isFile', plugins.read, (val) => Promise.resolve(val))
+    .mapAsyncWhen(['isFile', 'shouldCompile'], plugins.compile)
+    .mapAsyncWhen(['isFile', 'shouldPostProcess'], plugins.postProcess)
+    .mapAsyncWhenElse('content', plugins.output, plugins.copy)
+    .mapAsyncWhenFilter('webPath', plugins.toWebPath)
+    .thru(val => Promise.all(val))
+    .value();
+}
+
+function serve() {
+  http.createServer(ecstatic(config.serveRoot)).listen(config.servePort);
+  console.log(config.serveMsg);
+  open(config.servePath);
 }

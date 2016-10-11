@@ -10,6 +10,7 @@
     "lib"
   ],
   "dependencies": {
+    "app-module-path": "^2.1.0",
     "coffee-script": "^1.10.0",
     "concat-with-sourcemaps": "^1.0.4",
     "contentful": "^3.5.0",
@@ -27,6 +28,7 @@
     "postcss": "^5.1.2",
     "postcss-cssnext": "^2.8.0",
     "promisify-node": "^0.4.0",
+    "require-dir": "^0.3.1",
     "stylus": "^0.54.5",
     "uglify-js": "^2.7.3",
     "yargs": "^5.0.0"
