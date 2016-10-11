@@ -20,9 +20,14 @@ const serveMsg = 'Millwright serving at ' + servePath + '...';
 const defaultCommand = 'dev';
 const normalizeToObjects = requireBuildScript('normalize-to-objects');
 const normalizePaths = requireBuildScript('normalize-paths');
+const normalizePathPipelines = requireBuildScript('normalize-path-pipelines');
 const normalizeGroups = requireBuildScript('normalize-groups');
 const read = requireBuildScript('plugins/read');
 const compile = requireBuildScript('plugins/compile');
+const postProcess = requireBuildScript('plugins/post-process');
+const output = requireBuildScript('plugins/output');
+const copy = requireBuildScript('plugins/copy');
+const toWebPath = requireBuildScript('plugins/to-web-path');
 
 const mill = {
   parseContent: requireBuildScript('parse-content'),
@@ -66,54 +71,48 @@ function build() {
 }
 
 function make(optimize) {
-  const fileGroups = fs.readJsonSync('src/wrapper.json');
-  const normalizedGroups = _(fileGroups)
+  mill.clean();
+
+  const assetGroups = fs.readJsonSync('src/wrapper.json');
+  const assets = {};
+
+  assets.groups = _(assetGroups)
     .mapValues(normalizeToObjects)
     .mapValues(normalizePaths)
+    .mapValues(normalizePathPipelines)
     .mapValues(normalizeGroups)
-    .mapValuesWhen('allFiles', group => {
-      const files = _(group.files)
-        .map(read)
-        .mapAsyncWhen('shouldCompile', compile)
-        .value();
-
-      return Promise.all(files).then(result => _.assign(group, {files: result}));
-    })
-    .mapValues(group => Promise.resolve(group))
+    .mapValues(group => _(group.files)
+      .mapWhenElse('isFile', read, (val) => Promise.resolve(val))
+      .mapAsyncWhen(['isFile', 'shouldCompile'], compile)
+      .mapAsyncWhen(['isFile', 'shouldPostProcess'], postProcess)
+      .mapAsyncWhenElse('content', output, copy)
+      .mapAsyncWhen('webPath', toWebPath)
+      .thru(val => Promise.all(val))
+      .value()
+    )
+    .toPairs()
+    .unzip()
     .value();
 
-  // templatePaths needs to have the keys from fileInfo.files, with the value of each being an array
-  // of one or more paths for use in the template.
-  //
-  // {
-  //   files: {...},
-  //   templatePaths: {
-  //     styles: ['styles.min.css']
-  //
-  //     -- or for dev --
-  //
-  //     scripts: [
-  //       'script1.js',
-  //       'script2.js'
-  //     ]
-  //
-  //     -- or it could even be individual minified scripts if concatenation is off (via plugin
-  //     disabled) --
-  //   }
-  // }
+  const assetGroupKeys = assets.groups[0];
+  const assetGroupValues = assets.groups[1];
 
-  /*
-  mill.clean();
-  if (contentfulKeys) {
-    const request = contentful.createClient(contentfulKeys).getEntries().then(entries => {
-      return mill.pages(_.assign(webPaths, mill.parseContent(entries.items)));
-    });
-    const templatePromise = mill.templateDeps(assets, optimize);
-    return Promise.all([templatePromise, request]);
+  // TODO: We're waiting to compile the views, including initializing the CMS get request, until
+  // asset processing is complete. The two should be happening simultaneously.
+
+  return Promise.all(assetGroupValues)
+    .then(result => assets.groups = _.zipObject(assetGroupKeys, result))
+    .then(result => getViews(contentfulKeys, result));
+
+  function getViews(keys, assetPaths) {
+    return contentfulKeys ? getContent(keys, assetPaths) : mill.pages(assetPaths);
   }
-  mill.pages(webPaths);
-  return mill.templateDeps(assets, optimize);
- */
+
+  function getContent(keys, assetPaths) {
+    return contentful.createClient(keys).getEntries().then(entries => {
+      return mill.pages(_.assign(assetPaths, mill.parseContent(entries.items)));
+    });
+  }
 }
 
 function serve() {
