@@ -10,7 +10,8 @@ const defaults = {
   serveRoot: 'dest',
   servePort: 8080,
   servePath: 'http://localhost:8080',
-  defaultCommand: 'dev'
+  defaultCommand: 'dev',
+  templateIgnorePaths: ['src/', 'bower_components', 'node_modules']
 }
 
 defaults.serveMsg = 'Millwright serving at ' + defaults.servePath + '...';

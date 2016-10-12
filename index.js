@@ -51,17 +51,17 @@ function build() {
 function make() {
   mill.clean();
 
-  const assetGroupPaths = fs.readJsonSync('src/wrapper.json');
-  const assetGroups = _(assetGroupPaths)
+  const pathsSource = 'src/wrapper.json';
+  const assetGroupPaths = _.mapValues(fs.readJsonSync(pathsSource), paths => {
+    return _.map(paths, _path => path.normalize(path.join(path.dirname(pathsSource), _path)));
+  });
+
+  return _(assetGroupPaths)
     .thru(normalize)
     .mapValues(generateAssets)
     .resolveAsyncObject()
-    .value();
-
-  // TODO: We're waiting to compile the views, including initializing the CMS get request, until
-  // asset processing is complete. The two should be happening simultaneously.
-
-  return assetGroups.then(result => getViews(config.contentful, result));
+    .value()
+    .then(result => getViews(config.contentful, result));
 
   function getViews(keys, assetPaths) {
     return keys ? getContent(keys, assetPaths) : mill.pages(assetPaths);
