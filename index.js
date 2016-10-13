@@ -1,4 +1,4 @@
-const _ = require('./lib/util/lodash-extended');
+const _ = require('./lib/lodash-extended');
 const argv = require('yargs').argv;
 const fs = require('fs-extra');
 const path = require('path');
