@@ -62,16 +62,6 @@ function make() {
     .resolveAsyncObject()
     .value()
     .then(result => getViews(config.contentful, result));
-
-  function getViews(keys, assetPaths) {
-    return keys ? getContent(keys, assetPaths) : mill.pages(assetPaths);
-  }
-
-  function getContent(keys, assetPaths) {
-    return contentful.createClient(keys).getEntries().then(entries => {
-      return mill.pages(_.assign(assetPaths, mill.parseContent(entries.items)));
-    });
-  }
 }
 
 function normalize(assetGroupPaths) {
@@ -92,6 +82,16 @@ function generateAssets(group) {
     .mapAsyncWhenFilter('webPath', plugins.toWebPath)
     .thru(val => Promise.all(val))
     .value();
+}
+
+function getViews(keys, assetPaths) {
+  return keys ? getContent(keys, assetPaths) : mill.pages(assetPaths);
+}
+
+function getContent(keys, assetPaths) {
+  return contentful.createClient(keys).getEntries().then(entries => {
+    return mill.pages(_.assign(assetPaths, mill.parseContent(entries.items)));
+  });
 }
 
 function serve() {
