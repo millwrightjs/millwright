@@ -19,6 +19,8 @@ module.exports = function(group, key) {
     result.path = path.join(result.dir, result.filename);
     result.filenameMin = key + extMin;
     result.pathMin = path.join(result.dir, result.filenameMin);
+
+    result.shouldConcat = true;
   }
 
   return _.assign(group, result);

@@ -12,22 +12,14 @@ const requireDir = require('require-dir');
 const plugins = requireDir('./plugins', {camelcase: true});
 const config = require('./config');
 
-const mill = {parseContent, pages, clean, make, build, dev, preview, serve};
+const mill = {clean, make, build, dev, preview, serve};
 const cmd = argv._[0];
 
-module.exports = runMill;
+module.exports = run;
 
-function runMill(cmd) {
+function run(cmd) {
   cmd = cmd || config.defaultCommand;
   mill[cmd]();
-}
-
-function parseContent(...args) {
-  return plugins.parseContent(...args);
-}
-
-function pages(...args) {
-  return plugins.pages(...args);
 }
 
 function clean() {
@@ -89,37 +81,48 @@ function normalize(assetGroupPaths) {
 }
 
 function prepareAssets(group) {
-  return _(group.files)
+  const files = _(group.files)
     .mapWhenElse('isFile', plugins.read, (val) => Promise.resolve(val))
     .mapAsyncWhen(['isFile', 'shouldCompile'], plugins.compile)
-    .mapAsyncWhen(['isFile', 'shouldPostProcess'], plugins.postProcess);
+    .mapAsyncWhen(['isFile', 'shouldPostProcess'], plugins.postProcess)
+    .value();
+
+  return _.assign(group, {files});
 }
 
-function optimizeAssets(wrappedGroup) {
-  return wrappedGroup
-    .mapAsyncWhen(['isFile', 'shouldMinify'], plugins.minify);
+function optimizeAssets(group) {
+  const files = _(group.files)
+    .mapAsyncWhen(['isFile', 'shouldMinify'], plugins.minify)
+    .value();
+
+  return _.assign(group, {files});
 }
 
-function generateAssets(wrappedGroup) {
-  return wrappedGroup
+function generateAssets(group) {
+  const files = _(group.files)
     .mapAsyncWhen('map', plugins.outputSourcemaps)
     .mapAsyncWhenElse('content', plugins.output, plugins.copy)
-    .mapAsyncWhenFilter('webPath', plugins.toWebPath);
+    .mapAsyncWhenFilter('webPath', plugins.toWebPath)
+    .value();
+
+  return _.assign(group, {files});
 }
 
-function toPromise(wrappedGroup) {
-  return wrappedGroup
+function toPromise(group) {
+  const files = _(group.files)
     .thru(val => Promise.all(val))
     .value();
+
+  return _.assign(group, {files});
 }
 
 function getViews(keys, assetPaths) {
-  return keys ? getContent(keys, assetPaths) : mill.pages(assetPaths);
+  return keys ? getContent(keys, assetPaths) : plugins.pages(assetPaths);
 }
 
 function getContent(keys, assetPaths) {
   return contentful.createClient(keys).getEntries().then(entries => {
-    return mill.pages(_.assign(assetPaths, mill.parseContent(entries.items)));
+    return plugins.pages(_.assign(assetPaths, plugins.parseContent(entries.items)));
   });
 }
 
