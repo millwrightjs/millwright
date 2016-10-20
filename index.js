@@ -8,14 +8,9 @@ const ecstatic = require('ecstatic');
 const contentful = require('contentful');
 
 const appModulePath = require('app-module-path');
-appModulePath.addPath(__dirname);
-appModulePath.addPath(path.join(__dirname, 'lib'));
-
 const requireDir = require('require-dir');
-
-const lib = requireDir('./lib', {camelcase: true});
-const plugins = requireDir('./lib/plugins', {camelcase: true});
-const config = require('config');
+const plugins = requireDir('./plugins', {camelcase: true});
+const config = require('./config');
 
 const mill = {parseContent, pages, clean, make, build, dev, preview, serve};
 const cmd = argv._[0];
@@ -28,11 +23,11 @@ function runMill(cmd) {
 }
 
 function parseContent(...args) {
-  return lib.parseContent(...args);
+  return plugins.parseContent(...args);
 }
 
 function pages(...args) {
-  return lib.pages(...args);
+  return plugins.pages(...args);
 }
 
 function clean() {
@@ -85,10 +80,10 @@ function make() {
 
 function normalize(assetGroupPaths) {
   return _(assetGroupPaths)
-    .mapValues(lib.normalizeToObjects)
-    .mapValues(lib.normalizePaths)
-    .mapValues(lib.normalizePathPipelines)
-    .mapValues(lib.normalizeGroups)
+    .mapValues(plugins.normalizeToObjects)
+    .mapValues(plugins.normalizePaths)
+    .mapValues(plugins.normalizePathPipelines)
+    .mapValues(plugins.normalizeGroups)
     .value();
 }
 

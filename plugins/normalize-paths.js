@@ -1,7 +1,7 @@
 const path = require('path');
-const _ = require('./lodash-extended');
+const _ = require('../lib/lodash-extended');
 const config = require('../config');
-const {getCompiledType, getType, stripIgnoredBasePath} = require('./util');
+const {getCompiledType, getType, stripIgnoredBasePath} = require('../lib/util');
 
 module.exports = group => _.assign(group, {files: _.map(group.files, normalize)});
 

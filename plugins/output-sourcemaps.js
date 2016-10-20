@@ -2,8 +2,8 @@ const path = require('path');
 const promisify = require('promisify-node');
 const fs = promisify(require('fs-extra'));
 const _ = require('lodash');
-const config = require('config');
-const util = require('../util');
+const config = require('../config');
+const util = require('../lib/util');
 
 module.exports = function outputSourcemaps(file) {
   // Get parsed path for sourcemaps directory in dest
@@ -11,9 +11,11 @@ module.exports = function outputSourcemaps(file) {
   const sourcePath = path.join(mapsDir, file.srcPathStripped);
   const sourcePathObj = path.parse(sourcePath);
 
-  // Append sourceMappingURL to file
+  // Get sourcemap path
   const mapName = sourcePathObj.name + '.map' + file.destExt;
   const mapPath = path.join(sourcePathObj.dir, mapName);
+
+  // Append sourceMappingURL to file
   const mapUrl = path.relative(file.destDir, mapPath);
   const mapUrlStringBase = '# sourceMappingURL=' + mapUrl;
   const mapUrlString = file.type === 'css' ? `/*${mapUrlStringBase} */` : `//${mapUrlStringBase}`;

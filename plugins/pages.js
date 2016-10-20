@@ -1,8 +1,8 @@
-const _ = require('./lodash-extended');
+const _ = require('../lib/lodash-extended');
 const fs = require('fs-extra');
 const path = require('path');
 const mustache = require('mustache');
-const {whicheverExists} = require('./util');
+const {whicheverExists} = require('../lib/util');
 
 module.exports = function(viewData) {
   const wrapperTemplatePath = whicheverExists('src/wrapper.mustache', 'src/page.mustache');

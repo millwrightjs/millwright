@@ -1,5 +1,5 @@
 const path = require('path');
-const _ = require('../lodash-extended');
+const _ = require('../lib/lodash-extended');
 const promisify = require('promisify-node');
 const fs = promisify(require('fs-extra'));
 
