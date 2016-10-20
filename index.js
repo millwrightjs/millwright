@@ -105,8 +105,8 @@ function optimizeAssets(wrappedGroup) {
 
 function generateAssets(wrappedGroup) {
   return wrappedGroup
-    .mapAsyncWhenElse('content', plugins.output, plugins.copy)
     .mapAsyncWhen('map', plugins.outputSourcemaps)
+    .mapAsyncWhenElse('content', plugins.output, plugins.copy)
     .mapAsyncWhenFilter('webPath', plugins.toWebPath);
 }
 
