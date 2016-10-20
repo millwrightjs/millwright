@@ -24,6 +24,7 @@ function normalize(_path) {
     const filename = path.basename(p);
     return {
       srcPathStripped,
+      srcDirStripped: path.dirname(srcPathStripped),
       srcPath: p,
       destPath: path.join(config.destBase, srcPathStripped),
       isFile: filename.includes('.')

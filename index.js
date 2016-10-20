@@ -55,6 +55,7 @@ function build() {
     .mapValues(prepareAssets)
     .mapValues(optimizeAssets)
     .mapValues(generateAssets)
+    .mapValues(toPromise)
     .resolveAsyncObject()
     .value()
     .then(result => getViews(config.contentful, result));
@@ -95,7 +96,8 @@ function prepareAssets(group) {
 }
 
 function optimizeAssets(wrappedGroup) {
-  return wrappedGroup;
+  return wrappedGroup
+    .mapAsyncWhen(['isFile', 'shouldMinify'], plugins.minify);
 }
 
 function generateAssets(wrappedGroup) {
