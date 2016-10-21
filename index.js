@@ -46,9 +46,10 @@ function build() {
     .thru(normalize)
     .mapValues(prepareAssets)
     .mapValues(optimizeAssets)
-    .mapValues(generateAssets)
     .mapValues(toPromise)
     .resolveAsyncObject()
+    .thenMapValuesWhen('shouldConcat', plugins.concat)
+    .thenMapValues(generateAssets)
     .value()
     .then(result => getViews(config.contentful, result));
 }
@@ -109,11 +110,9 @@ function generateAssets(group) {
 }
 
 function toPromise(group) {
-  const files = _(group.files)
-    .thru(val => Promise.all(val))
-    .value();
-
-  return _.assign(group, {files});
+  const promise = Promise.all(group.files);
+  const result = _.assign(group, {files: promise});
+  return result;
 }
 
 function getViews(keys, assetPaths) {

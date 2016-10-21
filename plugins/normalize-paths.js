@@ -13,6 +13,7 @@ function normalize(_path) {
       .thru(isFile)
       .thruIf(getCompiledType, compiledType)
       .thruIfElse('isMinified', isMinified, isNotMinified)
+      .thru(sourcemap)
       .thru(webPath)
       .value();
   }
@@ -53,9 +54,9 @@ function normalize(_path) {
       basename,
       type: srcType,
       destExt: srcExt,
+      destFilename: srcFilename,
       isMinified: path.extname(basename) === '.min',
-      destDir: path.dirname(p.destPath),
-      destFilename: srcFilename
+      destDir: path.dirname(p.destPath)
     };
     return _.assign(p, assigned);
   }
@@ -66,7 +67,7 @@ function normalize(_path) {
       destFilename,
       type: compiledType,
       destExt: '.' + compiledType,
-      destPath: path.join(p.destDir, destFilename)
+      destPath: path.join(p.destDir, destFilename),
     };
 
     return _.assign(p, assigned);
@@ -87,6 +88,14 @@ function normalize(_path) {
     const assigned = {
       destFilenameMin,
       destPathMin: path.join(p.destDir, destFilenameMin)
+    };
+
+    return _.assign(p, assigned);
+  }
+
+  function sourcemap(p) {
+    const assigned = {
+      sourcemapPath: path.join(p.srcDirStripped, p.destFilename + '.map')
     };
 
     return _.assign(p, assigned);
