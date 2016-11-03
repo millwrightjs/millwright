@@ -49,8 +49,11 @@ function build() {
     .mapValuesWhen('shouldConcat', concatAssets)
     .mapValues(generateAssets)
     .mapValues(toWebPaths)
-    .value()
+    .mapValues(val => _.map(val, v => v.then(console.log)))
+    .value();
+    /*
     .then(result => getViews(config.contentful, result));
+   */
 
 }
 
@@ -101,28 +104,34 @@ function optimizeAssets(group) {
 
 function concatAssets(group) {
   const files = _(group.files)
-    
-    
+    .value();
+
+  return _.assign(group, {files});
+}
+
     /*
     .mapValues(promiseAllFiles)
     .mapValuesWhenElse('shouldConcat', plugins.concat)
     .mapValues(group => _.assign(group, {files: [group.files]}))
-    .mapValues(generateAssets)
     .mapValues(promiseAllFiles)
     .resolveAsyncObject()
-    .value()
-    .then(result => getViews(config.contentful, result));
    */
-}
 
 function generateAssets(group) {
   const files = _(group.files)
     .mapAsyncWhen('map', plugins.outputSourcemaps)
     .mapAsyncWhenElse('content', plugins.output, plugins.copy)
-    .mapAsyncWhenFilter('webPath', plugins.toWebPath)
     .value();
 
   return _.assign(group, {files});
+}
+
+function toWebPaths(group) {
+  const files = _(group.files)
+    .mapAsyncWhenFilter('webPath', plugins.toWebPath)
+    .value();
+
+  return files;
 }
 
 function promiseAllFiles(group) {
