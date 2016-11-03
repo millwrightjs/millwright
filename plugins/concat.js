@@ -3,7 +3,7 @@ const Concat = require('concat-with-sourcemaps');
 
 module.exports = function concat(group) {
   const concatenated = group.files.then(concatenate);
-  return _.assign(group, {files: concatenated});
+  return _.assign(group, {files: [concatenated]});
 
   function concatenate(files) {
     const c = new Concat(true, group.destFilenameMin, '\n');
@@ -14,7 +14,9 @@ module.exports = function concat(group) {
       destDir: group.destDir,
       destFilenameMin: group.destFilenameMin,
       destPathMin: group.destPathMin,
-      webPath: group.webPath
+      webPath: group.webPath,
+      sourcemapPath: group.sourcemapPath,
+      type: group.type
     };
   }
 }

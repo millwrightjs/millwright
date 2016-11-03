@@ -20,6 +20,7 @@ module.exports = function(group, key) {
     result.destPath = path.join(result.destDir, result.destFilename);
     result.destPathMin = result.destPath;
     result.webPath = result.destFilename;
+    result.sourcemapPath = result.webPath + '.map';
 
     result.shouldConcat = true;
   }

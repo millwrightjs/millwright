@@ -46,11 +46,11 @@ function build() {
     .thru(normalize)
     .mapValues(prepareAssets)
     .mapValues(optimizeAssets)
+    .mapValues(copySource)
     .mapValuesWhen('shouldConcat', concatAssets)
     .mapValues(generateAssets)
     .mapValues(toWebPaths)
-    .mapValues(val => _.map(val, v => v.then(console.log)))
-    .value();
+    .value()
     /*
     .then(result => getViews(config.contentful, result));
    */
@@ -102,11 +102,17 @@ function optimizeAssets(group) {
   return _.assign(group, {files});
 }
 
-function concatAssets(group) {
+function copySource(group) {
   const files = _(group.files)
+    .mapAsyncWhen(['isFile', 'shouldCopySource'], plugins.copySource)
     .value();
 
   return _.assign(group, {files});
+}
+
+function concatAssets(group) {
+  const files = Promise.all(group.files);
+  return plugins.concat(_.assign(group, {files}));
 }
 
     /*
@@ -134,8 +140,8 @@ function toWebPaths(group) {
   return files;
 }
 
-function promiseAllFiles(group) {
-  const promise = Promise.all(group.files);
+function promiseAllFiles(files) {
+  const promise = Promise.all(files);
   const result = _.assign(group, {files: promise});
   return result;
 }
