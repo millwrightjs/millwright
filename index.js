@@ -49,7 +49,8 @@ function build() {
     .thru(normalize)
     .mapValues(prepareAssets)
     .mapValues(optimizeAssets)
-    .mapValuesWhen('shouldConcat', copySource)
+    .mapValues(copySource)
+    .mapValues(remapSourcesConcat)
     .mapValuesWhen('shouldConcat', concatAssets)
     .mapValues(generateAssets)
     .mapValues(toWebPaths)
@@ -70,8 +71,11 @@ function make() {
   return _(assetGroupPaths)
     .thru(normalize)
     .mapValues(prepareAssets)
+    .mapValues(copySource)
+    .mapValues(remapSources)
     .mapValues(generateAssets)
-    .mapValues(toPromise)
+    .mapValues(toWebPaths)
+    .mapValues(paths => Promise.all(paths))
     .resolveAsyncObject()
     .value()
     .then(result => getViews(config.contentful, result));
@@ -106,7 +110,23 @@ function optimizeAssets(group) {
 
 function copySource(group) {
   const files = _(group.files)
-    .mapAsyncWhen(['isFile'], plugins.copySource)
+    .mapAsyncWhen('map', plugins.copySource)
+    .value();
+
+  return _.assign(group, {files});
+}
+
+function remapSources(group) {
+  const files = _(group.files)
+    .mapAsyncWhen('map', plugins.remapSources)
+    .value();
+
+  return _.assign(group, {files});
+}
+
+function remapSourcesConcat(group) {
+  const files = _(group.files)
+    .mapAsyncWhen('map', plugins.remapSourcesConcat)
     .value();
 
   return _.assign(group, {files});
