@@ -3,7 +3,7 @@ const _ = require('lodash');
 const postcss = require('postcss');
 const cssnext = require('postcss-cssnext');
 
-module.exports = function compile(file) {
+module.exports = function postProcess(file) {
   const compiled = compilers[file.type + 'C'](file);
   return compiled.then(result => _.assign(file, result));
 };

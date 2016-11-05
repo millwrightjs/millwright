@@ -11,6 +11,7 @@ module.exports = function concat(group) {
     return {
       content: c.content.toString(),
       map: c.sourceMap,
+      destPath: group.destPath,
       destDir: group.destDir,
       destFilenameMin: group.destFilenameMin,
       destPathMin: group.destPathMin,

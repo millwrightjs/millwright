@@ -1,24 +1,30 @@
 const path = require('path');
 const promisify = require('promisify-node');
 const fs = promisify(require('fs-extra'));
-const _ = require('lodash');
+const _ = require('../lib/lodash-extended');
 const config = require('../config');
 const util = require('../lib/util');
 
 module.exports = function copySource(file) {
-  console.log(file.srcPath);
-  // Get paths
-  const mapsDir = path.join(config.destBase, 'sourcemaps');
-  const parsedMap = _.isString(file.map) ? JSON.parse(file.map) : file.map;
-  parsedMap.sources = _.map(parsedMap.sources, source => path.relative(file.srcDir || '', source));
+  const promises = [copyToSourcemaps(file.srcPath)];
 
-  // Copy source to sourcemaps directory
-  const sources = _.without(_.concat(file.srcPath, parsedMap.sources), undefined);
-  const outputSources = _.map(sources, source => {
-    const strippedSource = util.stripIgnoredBasePath(source, config.templateIgnoredBasePaths);
-    const mappedSource = path.join(mapsDir, strippedSource);
-    return fs.copy(source, mappedSource, {dereference: true});
-  });
+  if (file.map) {
+    const parsedMap = _.isString(file.map) ? JSON.parse(file.map) : file.map;
+    _.forEach(parsedMap.sources, source => promises.push(copyToSourcemaps(source)));
 
-  return Promise.all(outputSources).then(() => file);
+    // Remap sources
+    parsedMap.sources = _.map(parsedMap.sources, source => {
+      return util.stripIgnoredBasePath(source, config.templateIgnoredBasePaths);
+    });
+    file.map = JSON.stringify(_.pick(parsedMap, 'version', 'mappings', 'names', 'sources'));
+  }
+
+  return Promise.all(promises).then(() => file);
+
+  function copyToSourcemaps(sourcePath) {
+    const strippedSourcePath = util.stripIgnoredBasePath(sourcePath, config.templateIgnoredBasePaths);
+    const sourcemapsPath = path.join(config.destBase, 'sourcemaps', strippedSourcePath);
+    return _.attemptSilent(fs.copy, sourcePath, sourcemapsPath, {dereference: true});
+  }
+
 }

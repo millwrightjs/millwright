@@ -17,6 +17,9 @@ const cmd = argv._[0];
 
 module.exports = run;
 
+process.on('uncaughtException', console.log);
+process.on('unhandledRejection', console.log);
+
 function run(cmd) {
   cmd = cmd || config.defaultCommand;
   mill[cmd]();
@@ -50,11 +53,10 @@ function build() {
     .mapValuesWhen('shouldConcat', concatAssets)
     .mapValues(generateAssets)
     .mapValues(toWebPaths)
+    .mapValues(paths => Promise.all(paths))
+    .resolveAsyncObject()
     .value()
-    /*
     .then(result => getViews(config.contentful, result));
-   */
-
 }
 
 function make() {
@@ -138,12 +140,6 @@ function toWebPaths(group) {
     .value();
 
   return files;
-}
-
-function promiseAllFiles(files) {
-  const promise = Promise.all(files);
-  const result = _.assign(group, {files: promise});
-  return result;
 }
 
 function getViews(keys, assetPaths) {
