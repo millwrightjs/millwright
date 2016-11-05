@@ -137,14 +137,6 @@ function concatAssets(group) {
   return plugins.concat(_.assign(group, {files}));
 }
 
-    /*
-    .mapValues(promiseAllFiles)
-    .mapValuesWhenElse('shouldConcat', plugins.concat)
-    .mapValues(group => _.assign(group, {files: [group.files]}))
-    .mapValues(promiseAllFiles)
-    .resolveAsyncObject()
-   */
-
 function generateAssets(group) {
   const files = _(group.files)
     .mapAsyncWhen('map', plugins.outputSourcemaps)
