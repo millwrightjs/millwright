@@ -8,7 +8,5 @@ function normalize(pathObj) {
     shouldPostProcess: !pathObj.isMinified && pathObj.srcType === 'css',
     shouldMinify: !pathObj.isMinified && ['css', 'js'].includes(pathObj.type),
   }
-  logic.shouldCopySource = !pathObj.isMinified && (logic.shouldCompile || logic.shouldPostProcess ||
-    logic.shouldMinify);
   return _.assign(pathObj, logic);
 }

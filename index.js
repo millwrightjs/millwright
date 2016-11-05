@@ -49,7 +49,7 @@ function build() {
     .thru(normalize)
     .mapValues(prepareAssets)
     .mapValues(optimizeAssets)
-    .mapValues(copySource)
+    .mapValuesWhen('shouldConcat', copySource)
     .mapValuesWhen('shouldConcat', concatAssets)
     .mapValues(generateAssets)
     .mapValues(toWebPaths)
@@ -106,7 +106,7 @@ function optimizeAssets(group) {
 
 function copySource(group) {
   const files = _(group.files)
-    .mapAsyncWhen(['isFile', 'shouldCopySource'], plugins.copySource)
+    .mapAsyncWhen(['isFile'], plugins.copySource)
     .value();
 
   return _.assign(group, {files});
