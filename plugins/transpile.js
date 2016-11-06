@@ -79,7 +79,15 @@ function coffee(file) {
 
 function js(file) {
   const presets = arr => arr.map(name => path.join(__dirname, '../node_modules/babel-preset-' + name));
-  const opts = {presets: presets(['es2015']), compact: false}
+  const opts = {
+    filename: file.srcFilename,
+    presets: presets(['es2015']),
+    sourceMaps: true,
+    sourceFileName: file.srcPath,
+    ast: false,
+    babelrc: false,
+    compact: false
+  };
   const transformed = babel.transform(file.content, opts);
   const result = {
     content: transformed.code,

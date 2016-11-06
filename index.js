@@ -22,7 +22,7 @@ process.on('unhandledRejection', console.log);
 
 function run(cmd) {
   cmd = cmd || config.defaultCommand;
-  mill[cmd]();
+  mill[cmd] ? (process.env.task = cmd) && mill[cmd]() : process.exit(1);
 }
 
 function clean() {
@@ -47,9 +47,9 @@ function build() {
 
   return _(assetGroupPaths)
     .thru(normalize)
-    .mapValues(prepareAssets)
-    .mapValues(optimizeAssets)
+    .mapValues(transpile)
     .mapValues(copySource)
+    .mapValues(minify)
     .mapValues(remapSourcesConcat)
     .mapValuesWhen('shouldConcat', concatAssets)
     .mapValues(generateAssets)
@@ -70,7 +70,7 @@ function make() {
 
   return _(assetGroupPaths)
     .thru(normalize)
-    .mapValues(prepareAssets)
+    .mapValues(transpile)
     .mapValues(copySource)
     .mapValues(remapSources)
     .mapValues(generateAssets)
@@ -90,26 +90,27 @@ function normalize(assetGroupPaths) {
     .value();
 }
 
-function prepareAssets(group) {
+function transpile(group) {
   const files = _(group.files)
     .mapWhenElse('isFile', plugins.read, (val) => Promise.resolve(val))
-    .mapAsyncWhen(['isFile', 'shouldTranspile'], plugins.transpile)
+    .mapAsyncWhen('shouldTranspile', plugins.transpile)
     .value();
 
   return _.assign(group, {files});
 }
 
-function optimizeAssets(group) {
+function minify(group) {
   const files = _(group.files)
-    .mapAsyncWhen(['isFile', 'shouldMinify'], plugins.minify)
+    .mapAsyncWhen('shouldMinify', plugins.minify)
     .value();
 
   return _.assign(group, {files});
 }
 
 function copySource(group) {
+  const shouldCopySource = process.env.task === 'make' ? 'shouldMinify' : 'jsOrCss';
   const files = _(group.files)
-    .mapAsyncWhen('map', plugins.copySource)
+    .mapAsyncWhen(shouldCopySource, plugins.copySource)
     .value();
 
   return _.assign(group, {files});
@@ -137,8 +138,9 @@ function concatAssets(group) {
 }
 
 function generateAssets(group) {
+  const shouldOutputSourcemaps = process.env.task === 'make' ? 'shouldMinify' : 'jsOrCss';
   const files = _(group.files)
-    .mapAsyncWhen('map', plugins.outputSourcemaps)
+    .mapAsyncWhen(shouldOutputSourcemaps, plugins.outputSourcemaps)
     .mapAsyncWhenElse('content', plugins.output, plugins.copy)
     .value();
 
