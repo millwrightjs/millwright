@@ -93,8 +93,7 @@ function normalize(assetGroupPaths) {
 function prepareAssets(group) {
   const files = _(group.files)
     .mapWhenElse('isFile', plugins.read, (val) => Promise.resolve(val))
-    .mapAsyncWhen(['isFile', 'shouldCompile'], plugins.compile)
-    .mapAsyncWhen(['isFile', 'shouldPostProcess'], plugins.postProcess)
+    .mapAsyncWhen(['isFile', 'shouldTranspile'], plugins.transpile)
     .value();
 
   return _.assign(group, {files});
