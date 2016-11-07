@@ -23,7 +23,8 @@ module.exports = function concat(group) {
       destPathMin: group.destPathMin,
       webPath: group.webPath,
       sourcemapPath: group.sourcemapPath,
-      type: group.type
+      type: group.type,
+      jsOrCss: true
     };
   }
 }
