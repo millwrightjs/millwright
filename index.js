@@ -22,7 +22,7 @@ process.on('unhandledRejection', console.log);
 
 function run(cmd) {
   cmd = cmd || config.defaultCommand;
-  mill[cmd] ? (process.env.task = cmd) && mill[cmd]() : process.exit(1);
+  mill[cmd]();
 }
 
 function clean() {
@@ -38,6 +38,8 @@ function preview() {
 }
 
 function build() {
+  process.env.task = 'build';
+
   mill.clean();
 
   const pathsSource = 'src/wrapper.json';
@@ -51,7 +53,7 @@ function build() {
     .mapValues(transpile)
     .mapValues(copySource)
     .mapValues(minify)
-    .mapValues(remapSourcesConcat)
+    .mapValues(remapSources)
     .mapValuesWhen('shouldConcat', concatAssets)
     .mapValues(generateAssets)
     .mapValues(toWebPaths)
@@ -62,6 +64,8 @@ function build() {
 }
 
 function make() {
+  process.env.task = 'make';
+
   mill.clean();
 
   const pathsSource = 'src/wrapper.json';
@@ -127,15 +131,7 @@ function copySource(group) {
 
 function remapSources(group) {
   const files = _(group.files)
-    .mapAsyncWhen('map', plugins.remapSources)
-    .value();
-
-  return _.assign(group, {files});
-}
-
-function remapSourcesConcat(group) {
-  const files = _(group.files)
-    .mapAsyncWhen('map', plugins.remapSourcesConcat)
+    .mapAsyncWhen('map', _.curry(plugins.remapSources)(process.env.task))
     .value();
 
   return _.assign(group, {files});
