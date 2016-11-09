@@ -7,9 +7,9 @@ module.exports = function(group, key) {
   const sampleType = group.files[0].type;
   const typesMatch = _.every(group.files, ['type', sampleType]);
 
-  result.allFiles = _.every(group.files, 'isFile');
+  result.jsOrCss = _.every(group.files, 'jsOrCss');
 
-  if (result.allFiles && typesMatch) {
+  if (result.jsOrCss && typesMatch) {
     result.type = sampleType;
 
     const ext = '.' + sampleType;

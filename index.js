@@ -47,6 +47,7 @@ function build() {
 
   return _(assetGroupPaths)
     .thru(normalize)
+    .mapValues(read)
     .mapValues(transpile)
     .mapValues(copySource)
     .mapValues(minify)
@@ -70,6 +71,7 @@ function make() {
 
   return _(assetGroupPaths)
     .thru(normalize)
+    .mapValues(read)
     .mapValues(transpile)
     .mapValues(copySource)
     .mapValues(remapSources)
@@ -90,9 +92,16 @@ function normalize(assetGroupPaths) {
     .value();
 }
 
+function read(group) {
+  const files = _(group.files)
+    .mapWhenElse('jsOrCss', plugins.read, (val) => Promise.resolve(val))
+    .value();
+
+  return _.assign(group, {files});
+}
+
 function transpile(group) {
   const files = _(group.files)
-    .mapWhenElse('isFile', plugins.read, (val) => Promise.resolve(val))
     .mapAsyncWhen('shouldTranspile', plugins.transpile)
     .value();
 
