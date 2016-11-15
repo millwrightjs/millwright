@@ -7,7 +7,6 @@ const open = require('open');
 const ecstatic = require('ecstatic');
 const contentful = require('contentful');
 
-const appModulePath = require('app-module-path');
 const requireDir = require('require-dir');
 const plugins = requireDir('./plugins', {camelcase: true});
 const config = require('./config');
@@ -21,8 +20,7 @@ process.on('uncaughtException', console.log);
 process.on('unhandledRejection', console.log);
 
 function run(cmd) {
-  cmd = cmd || config.defaultCommand;
-  mill[cmd]();
+  mill[cmd || config.defaultCommand]();
 }
 
 function clean() {
@@ -39,32 +37,11 @@ function preview() {
 
 function build() {
   process.env.task = 'build';
-
-  mill.clean();
-
-  const pathsSource = 'src/wrapper.json';
-  const assetGroupPaths = _.mapValues(fs.readJsonSync(pathsSource), paths => {
-    return _.map(paths, _path => path.normalize(path.join(path.dirname(pathsSource), _path)));
-  });
-
-  return _(assetGroupPaths)
-    .thru(normalize)
-    .mapValues(read)
-    .mapValues(transpile)
-    .mapValues(copySource)
-    .mapValues(minify)
-    .mapValues(remapSources)
-    .mapValuesWhen('shouldConcat', concatAssets)
-    .mapValues(generateAssets)
-    .mapValues(toWebPaths)
-    .mapValues(paths => Promise.all(paths))
-    .resolveAsyncObject()
-    .value()
-    .then(result => getViews(config.contentful, result));
+  return make();
 }
 
 function make() {
-  process.env.task = 'make';
+  process.env.task = process.env.task || 'make';
 
   mill.clean();
 
@@ -78,7 +55,9 @@ function make() {
     .mapValues(read)
     .mapValues(transpile)
     .mapValues(copySource)
+    .mapValuesOn('build', minify)
     .mapValues(remapSources)
+    .mapValuesOnWhen('build', 'shouldConcat', concatAssets)
     .mapValues(generateAssets)
     .mapValues(toWebPaths)
     .mapValues(paths => Promise.all(paths))
