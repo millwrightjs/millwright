@@ -1,12 +1,18 @@
-const http = require('http');
-const ecstatic = require('ecstatic');
-const opn = require('opn');
+const path = require('path');
+const chokidar = require('chokidar');
+const bs = require('browser-sync').create();
 const config = require('../config');
+const requireDir = require('require-dir');
+const tasks = requireDir('../tasks', {camelcase: true});
 
 module.exports = serve;
 
 function serve() {
-  http.createServer(ecstatic(config.serveRoot)).listen(config.servePort);
-  console.log(config.serveMsg);
-  opn(config.servePath);
+  chokidar.watch(path.join(process.cwd(), '**/*.less')).on('change', () => {
+    tasks['make']().then(() => {
+      bs.reload(path.join(process.cwd(), 'dist', '**/*.css'));
+    });
+  });
+
+  bs.init({server: config.serveRoot, notify: false, ghostMode: false});
 }

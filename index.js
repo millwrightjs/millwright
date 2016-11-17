@@ -6,7 +6,6 @@ const requireDir = require('require-dir');
 const tasks = requireDir('./tasks', {camelcase: true});
 const config = require('./config');
 
-const cmd = argv._[0] || config.defaultCommand;;
+const cmd = argv._[0] || config.defaultCommand;
 
 module.exports = tasks[cmd];
-
