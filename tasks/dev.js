@@ -4,5 +4,5 @@ const serve = require('./serve');
 module.exports = dev;
 
 function dev() {
-  make().then(serve);
+  return make().then(serve);
 }

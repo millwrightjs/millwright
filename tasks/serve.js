@@ -2,14 +2,15 @@ const path = require('path');
 const chokidar = require('chokidar');
 const bs = require('browser-sync').create();
 const config = require('../config');
-const requireDir = require('require-dir');
-const tasks = requireDir('../tasks', {camelcase: true});
+const make = require('./make');
 
 module.exports = serve;
 
 function serve() {
-  chokidar.watch(path.join(process.cwd(), '**/*.less')).on('change', () => {
-    tasks['make']().then(() => {
+  const chokidarOpts = {ignored: path.join(process.cwd(), config.destBase, '**')};
+
+  chokidar.watch(path.join(process.cwd(), '**/*.less'), chokidarOpts).on('change', () => {
+    make().then(() => {
       bs.reload(path.join(process.cwd(), 'dist', '**/*.css'));
     });
   });
