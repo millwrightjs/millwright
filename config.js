@@ -1,6 +1,6 @@
 const path = require('path');
 const fs = require('fs-extra');
-const _ = require('lodash');
+const _ = require('./lib/lodash-extended');
 
 const configPath = path.join(process.cwd(), 'millwright.json');
 const config = _.attemptSilent(fs.readJsonSync, configPath);
