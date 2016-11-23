@@ -18,6 +18,7 @@ function make() {
   const assetGroupPaths = _.mapValues(fs.readJsonSync(pathsSource), paths => {
     return _.map(paths, _path => path.normalize(path.join(path.dirname(pathsSource), _path)));
   });
+  const watchPaths = {};
 
   return _(assetGroupPaths)
     .thru(normalize)
@@ -28,11 +29,13 @@ function make() {
     .mapValues(remapSources)
     .mapValuesOnWhen('build', 'shouldConcat', concatAssets)
     .mapValues(generateAssets)
+    .mapValues(_.partial(setWatchPaths, watchPaths))
     .mapValues(toWebPaths)
     .mapValues(paths => Promise.all(paths))
     .resolveAsyncObject()
     .value()
     .then(result => getViews(config.contentful, result));
+    .then(() => watchPaths)
 }
 
 function normalize(assetGroupPaths) {
@@ -95,6 +98,21 @@ function generateAssets(group) {
   const files = _(group.files)
     .mapAsyncWhen(shouldOutputSourcemaps, plugins.outputSourcemaps)
     .mapAsyncWhenElse('content', plugins.output, plugins.copy)
+    .value();
+
+  return _.assign(group, {files});
+}
+
+function setWatchPaths(watchPaths, group) {
+
+  // We have to tap into the promise chain, so we'll need to return a promise
+  // like other plugins, even though our operations won't be async
+
+  const files = _(group.files)
+    .forEach(file => {
+      if (file.mapImports) {
+
+    .mapAsync(obj => console.log(obj.destPath, obj.mapImports))
     .value();
 
   return _.assign(group, {files});
