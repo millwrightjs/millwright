@@ -54,10 +54,10 @@ function make(opts) {
 
 function normalize(assetGroupPaths) {
   return _(assetGroupPaths)
-    .mapValues(plugins.normalizeToObjects)
-    .mapValues(plugins.normalizePaths)
-    .mapValues(plugins.normalizePathPipelines)
-    .mapValues(plugins.normalizeGroups)
+    .map((paths, groupKey) => _.map(paths, path => ({groupKey, path})))
+    .flatten()
+    .map(plugins.normalizePaths)
+    .log()
     .value();
 }
 

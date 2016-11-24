@@ -3,108 +3,74 @@ const _ = require('../lib/lodash-extended');
 const config = require('../config');
 const {getCompiledType, getType, stripIgnoredBasePath} = require('../lib/util');
 
-module.exports = group => _.assign(group, {files: _.map(group.files, normalize)});
+module.exports = normalize;
 
-function normalize(_path) {
-  const pathObj = base(_path);
+function normalize(ref) {
+  const filename = path.basename(ref.path);
 
-  if (pathObj.isFile) {
-    return _(pathObj)
-      .thru(isFile)
-      .thruIf(getCompiledType, compiledType)
-      .thruIfElse('isMinified', isMinified, isNotMinified)
-      .thru(sourcemap)
-      .thru(webPath)
-      .value();
+  ref.srcPathStripped = stripIgnoredBasePath(ref.path, config.templateIgnoredBasePaths);
+  ref.srcDirStripped = path.dirname(ref.srcPathStripped);
+  ref.srcPath = ref.path;
+  ref.destPath = path.join(config.destBase, ref.srcPathStripped);
+  ref.isFile = filename.includes('.');
+
+  if (!ref.isFile) {
+    ref.srcDir = ref.srcPath;
+    ref.destDir = ref.destPath;
+    return ref;
   }
 
-  return isNotFile(pathObj);
+  ref.srcFilename = path.basename(ref.srcPath);
+  ref.srcExt = path.extname(ref.srcFilename);
+  ref.basename = path.basename(ref.srcFilename, ref.srcExt);
+  ref.srcDir = path.dirname(ref.srcPath);
+  ref.srcType = getType(ref.srcExt);
+  ref.destType = ref.srcType;
+  ref.destExt = ref.srcExt;
+  ref.destFilename = ref.srcFilename;
+  ref.isMinified = path.extname(ref.basename) === '.min';
+  ref.destDir = path.dirname(ref.destPath);
 
-  function base(p) {
-    const srcPathStripped = stripIgnoredBasePath(p, config.templateIgnoredBasePaths);
-    const filename = path.basename(p);
-    return {
-      srcPathStripped,
-      srcDirStripped: path.dirname(srcPathStripped),
-      srcPath: p,
-      destPath: path.join(config.destBase, srcPathStripped),
-      isFile: filename.includes('.')
-    };
+  const compiledType = getCompiledType(ref.srcType);
+
+  if (compiledType) {
+    ref.destType = compiledType;
+    ref.destFilename = ref.basename + '.' + ref.destType;
+    ref.destExt = '.' + ref.destType;
+    ref.destPath = path.join(ref.destDir, ref.destFilename);
   }
 
-  function isNotFile(p) {
-    const assigned = {
-      srcDir: p.srcPath,
-      destDir: p.destPath
-    }
-    return _.assign(p, assigned);
+  if (ref.isMinified) {
+    ref.destFilenameMin = ref.destFilename;
+    ref.destPathMin = ref.destPath;
+    ref.basename = path.basename(ref.basename, '.min');
   }
 
-  function isFile(p) {
-    const srcFilename = path.basename(p.srcPath);
-    const srcExt = path.extname(srcFilename);
-    const basename = path.basename(srcFilename, srcExt);
-    const srcDir = path.dirname(p.srcPath);
-    const srcType = getType(srcExt);
-    const assigned = {
-      srcFilename,
-      srcDir,
-      srcType,
-      srcExt,
-      basename,
-      type: srcType,
-      destExt: srcExt,
-      destFilename: srcFilename,
-      isMinified: path.extname(basename) === '.min',
-      destDir: path.dirname(p.destPath)
-    };
-    return _.assign(p, assigned);
+  if (!ref.isMinified) {
+    ref.destFilenameMin = ref.basename + '.min.' + ref.destType;
+    ref.destPathMin = path.join(ref.destDir, ref.destFilenameMin);
   }
 
-  function compiledType(p, compiledType) {
-    const destFilename = p.basename + '.' + compiledType;
-    const assigned = {
-      destFilename,
-      type: compiledType,
-      destExt: '.' + compiledType,
-      destPath: path.join(p.destDir, destFilename),
-    };
+  // Sourcemap filename
+  ref.sourcemapPath = path.join(ref.srcDirStripped, ref.destFilename + '.map');
 
-    return _.assign(p, assigned);
-  }
+  // Relative path for use in templates
+  ref.webPath = path.join(path.dirname(ref.srcPathStripped), ref.destFilename);
 
-  function isMinified(p) {
-    const assigned = {
-      destFilenameMin: p.destFilename,
-      destPathMin: p.destPath,
-      basename: path.basename(p.basename, '.min')
-    };
+  ref.isCode = ref.destType === 'css' || ref.destType === 'js';
+  ref.shouldTranspile = !ref.isMinified && ref.isCode;
+  ref.shouldMinify = !ref.isMinified && ref.isCode;
 
-    return _.assign(p, assigned);
-  }
+  // Group attributes for minification/concatenation
+  const destExtMin = '.min' + ref.destExt;
 
-  function isNotMinified(p) {
-    const destFilenameMin = p.basename + '.min.' + p.type;
-    const assigned = {
-      destFilenameMin,
-      destPathMin: path.join(p.destDir, destFilenameMin)
-    };
+  ref.groupDestDir = config.destBase;
+  ref.groupDestFilename = ref.groupKey + destExtMin;
+  ref.groupDestFilenameMin = ref.groupDestFilename;
+  ref.groupDestPath = path.join(ref.groupDestDir, ref.groupDestFilename);
+  ref.groupDestPathMin = ref.groupDestPath;
+  ref.groupWebPath = ref.groupDestFilename;
+  ref.groupSourcemapPath = ref.groupWebPath + '.map';
 
-    return _.assign(p, assigned);
-  }
-
-  function sourcemap(p) {
-    const assigned = {
-      sourcemapPath: path.join(p.srcDirStripped, p.destFilename + '.map')
-    };
-
-    return _.assign(p, assigned);
-  }
-
-  function webPath(p) {
-    const assigned = {
-      webPath: path.join(path.dirname(p.srcPathStripped), p.destFilename)
-    };
-    return _.assign(p, assigned);
-  }
+  return ref;
 }
