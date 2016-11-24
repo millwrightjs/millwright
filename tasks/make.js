@@ -9,7 +9,21 @@ const plugins = requireDir('../plugins', {camelcase: true});
 
 module.exports = make;
 
-function make() {
+function make(opts) {
+  if (opts && opts.watch) {
+    return _(opts.paths)
+      .thru(normalize)
+      .mapValues(read)
+      .mapValues(transpile)
+      .mapValues(copySource)
+      .mapValues(remapSources)
+      .mapValues(generateAssets)
+      .mapValues(toDestPaths)
+      .mapValues(paths => Promise.all(paths))
+      .resolveAsyncObject()
+      .value();
+  }
+
   process.env.task = process.env.task || 'make';
 
   clean();
@@ -18,7 +32,7 @@ function make() {
   const assetGroupPaths = _.mapValues(fs.readJsonSync(pathsSource), paths => {
     return _.map(paths, _path => path.normalize(path.join(path.dirname(pathsSource), _path)));
   });
-  const watchPaths = {};
+  const watchFiles = {};
 
   return _(assetGroupPaths)
     .thru(normalize)
@@ -29,13 +43,13 @@ function make() {
     .mapValues(remapSources)
     .mapValuesOnWhen('build', 'shouldConcat', concatAssets)
     .mapValues(generateAssets)
-    .mapValues(_.partial(setWatchPaths, watchPaths))
+    .tap(_.partial(setWatchFiles, watchFiles))
     .mapValues(toWebPaths)
     .mapValues(paths => Promise.all(paths))
     .resolveAsyncObject()
     .value()
-    .then(result => getViews(config.contentful, result));
-    .then(() => watchPaths)
+    .then(result => getViews(config.contentful, result))
+    .then(() => watchFiles);
 }
 
 function normalize(assetGroupPaths) {
@@ -103,19 +117,13 @@ function generateAssets(group) {
   return _.assign(group, {files});
 }
 
-function setWatchPaths(watchPaths, group) {
-
-  // We have to tap into the promise chain, so we'll need to return a promise
-  // like other plugins, even though our operations won't be async
-
-  const files = _(group.files)
-    .forEach(file => {
-      if (file.mapImports) {
-
-    .mapAsync(obj => console.log(obj.destPath, obj.mapImports))
-    .value();
-
-  return _.assign(group, {files});
+function setWatchFiles(watchFiles, groups) {
+  _.forEach(groups, group => _.forEach(group.files, file => {
+    file.then(file => {
+      watchFiles[path.resolve(file.srcPath)] = file.srcPath;
+      _.forEach(file.mapImports, _import => watchFiles[path.resolve(_import)] = file.srcPath);
+    });
+  }));
 }
 
 function toWebPaths(group) {
@@ -124,6 +132,10 @@ function toWebPaths(group) {
     .value();
 
   return files;
+}
+
+function toDestPaths(group) {
+  return _.map(group.files, file => file.then(file => path.resolve(file.destPath)));
 }
 
 function getViews(keys, assetPaths) {
