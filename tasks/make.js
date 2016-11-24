@@ -43,13 +43,13 @@ function make(opts) {
     .mapValues(remapSources)
     .mapValuesOnWhen('build', 'shouldConcat', concatAssets)
     .mapValues(generateAssets)
-    .tap(_.partial(setWatchFiles, watchFiles))
+    .tap(process.env.task === 'make' ? _.partial(setWatchFiles, watchFiles) : _.noop)
     .mapValues(toWebPaths)
     .mapValues(paths => Promise.all(paths))
     .resolveAsyncObject()
     .value()
     .then(result => getViews(config.contentful, result))
-    .then(() => watchFiles);
+    .then(() => process.env.task === 'make' ? {watchFiles} : null);
 }
 
 function normalize(assetGroupPaths) {
