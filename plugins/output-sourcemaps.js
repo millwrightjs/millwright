@@ -12,7 +12,7 @@ module.exports = function outputSourcemaps(file) {
   // Append sourceMappingURL to file
   const mapUrl = path.relative(file.destDir, mapPath);
   const mapUrlStringBase = '# sourceMappingURL=' + mapUrl;
-  const mapUrlString = file.type === 'css' ? `/*${mapUrlStringBase} */` : `//${mapUrlStringBase}`;
+  const mapUrlString = file.destType === 'css' ? `/*${mapUrlStringBase} */` : `//${mapUrlStringBase}`;
   file.content += _.endsWith(file.content, '\n') ? mapUrlString : '\n' + mapUrlString;
 
   // Rebuild sourcemap for consistency, remap sources, then output

@@ -58,7 +58,6 @@ function normalize(ref) {
   ref.webPath = path.join(path.dirname(ref.srcPathStripped), ref.destFilename);
 
   ref.isCode = ref.destType === 'css' || ref.destType === 'js';
-  ref.shouldTranspile = !ref.isMinified && ref.isCode;
   ref.shouldMinify = !ref.isMinified && ref.isCode;
 
   // Group attributes for minification/concatenation

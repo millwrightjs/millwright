@@ -3,7 +3,9 @@ const _ = require('../lib/lodash-extended');
 const config = require('../config');
 const util = require('../lib/util');
 
-module.exports = function remapSources(task, file) {
+module.exports = remapSources;
+
+function remapSources(task, file) {
   const build = task === 'build';
   const parsedMap = _.isString(file.map) ? JSON.parse(file.map) : file.map;
   parsedMap.sources = _.map(parsedMap.sources, source => {

@@ -4,7 +4,7 @@ const cssnano = require('cssnano');
 const uglifyjs = require('uglify-js');
 
 module.exports = function minify(file) {
-  const minified = minifiers[file.type](file);
+  const minified = minifiers[file.destType](file);
   return minified.then(result => _.assign(file, result));
 }
 
