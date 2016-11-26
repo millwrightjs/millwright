@@ -61,10 +61,9 @@ function normalize(ref) {
   ref.shouldMinify = !ref.isMinified && ref.isCode;
 
   // Group attributes for minification/concatenation
-  const destExtMin = '.min' + ref.destExt;
-
+  ref.destExtMin = '.min' + ref.destExt;
   ref.groupDestDir = config.destBase;
-  ref.groupDestFilename = ref.groupKey + destExtMin;
+  ref.groupDestFilename = ref.groupKey + ref.destExtMin;
   ref.groupDestFilenameMin = ref.groupDestFilename;
   ref.groupDestPath = path.join(ref.groupDestDir, ref.groupDestFilename);
   ref.groupDestPathMin = ref.groupDestPath;
