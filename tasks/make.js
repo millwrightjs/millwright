@@ -58,13 +58,13 @@ function generateAssets(assets, watch) {
   else {
     return assetsGenerated
       .then(result => {
-        if (result.then) {
+        if (_.isPromise(result)) {
           return result.then(result => getViews(config.contentful, result));
         }
         return getViews(config.contentful, result);
       })
       .then(result => {
-        if (_.has(result, 'then')) {
+        if (_.isPromise(result)) {
           return result.then(() => task === 'make' ? {watchFiles} : null);
         }
         return task === 'make' ? {watchFiles} : null;
