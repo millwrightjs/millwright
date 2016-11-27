@@ -85,7 +85,6 @@ function js(file) {
     sourceMaps: true,
     sourceFileName: file.srcPath,
     ast: false,
-    babelrc: false,
     compact: false
   };
   const transformed = babel.transform(file.content, opts);

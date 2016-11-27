@@ -38,7 +38,7 @@ function generateAssets(assets, watch) {
     .map(plugins.normalizePaths)
     .mapIf(plugins.read, a => a.isCode)
     .mapIf(plugins.promisify, a => !a.isCode)
-    .mapAsyncIf(plugins.transpile, a => a.isCode)
+    .mapAsyncIf(plugins.transpile, a => a.isCode && !a.isMinified)
     .mapAsyncIf(plugins.copySource, a => a.isCode)
     .mapAsyncWhenIf(plugins.minify, task === 'build', a => a.isCode)
     .mapAsyncIf(plugins.remapSources(task), a => a.isCode && a.map)
