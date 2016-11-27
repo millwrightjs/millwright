@@ -1,5 +1,5 @@
-process.on('uncaughtException', console.log);
-process.on('unhandledRejection', console.log);
+process.on('uncaughtException', e => {console.log(e); process.exit(1);});
+process.on('unhandledRejection', e => {console.log(e); process.exit(1);});
 
 const argv = require('yargs').argv;
 const requireDir = require('require-dir');
