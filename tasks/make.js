@@ -40,7 +40,7 @@ function generateAssets(assets, watch) {
     .mapIf(plugins.promisify, a => !a.isCode)
     .mapAsyncIf(plugins.transpile, a => a.isCode && !a.isMinified)
     .mapAsyncIf(plugins.copySource, a => a.isCode)
-    .mapAsyncWhenIf(plugins.minify, task === 'build', a => a.isCode)
+    .mapAsyncWhenIf(plugins.minify, task === 'build', a => a.isCode && !a.isMinified)
     .mapAsyncIf(plugins.remapSources(task), a => a.isCode && a.map)
     .thruAsyncWhen(plugins.concat, task === 'build')
     .mapAsyncIf(plugins.outputSourcemaps, a => a.isCode)
