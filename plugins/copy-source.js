@@ -1,9 +1,9 @@
 const path = require('path');
 const promisify = require('promisify-node');
 const fs = promisify(require('fs-extra'));
-const _ = require('../lib/lodash-extended');
+const _ = require('lodash');
 const config = require('../config');
-const util = require('../lib/util');
+const util = require('../utils/util');
 
 module.exports = function copySource(file) {
   const promises = [copyToSourcemaps(file.srcPath)];

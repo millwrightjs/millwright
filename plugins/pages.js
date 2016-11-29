@@ -1,8 +1,8 @@
-const _ = require('../lib/lodash-extended');
+const _ = require('lodash');
 const fs = require('fs-extra');
 const path = require('path');
 const handlebars = require('handlebars');
-const {whicheverExists} = require('../lib/util');
+const {whicheverExists} = require('../utils/util');
 
 module.exports = function(viewData) {
   const wrapperTemplatePath = whicheverExists('src/wrapper.hbs', 'src/page.hbs');

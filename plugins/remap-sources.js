@@ -1,7 +1,7 @@
 const path = require('path');
-const _ = require('../lib/lodash-extended');
+const _ = require('lodash');
 const config = require('../config');
-const util = require('../lib/util');
+const util = require('../utils/util');
 
 module.exports = remapSources;
 

@@ -1,4 +1,4 @@
-const _ = require('../lib/lodash-extended');
+const _ = require('lodash');
 const fs = require('fs-extra');
 const path = require('path');
 const clean = require('./clean');

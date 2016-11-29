@@ -1,5 +1,5 @@
 const config = require('../config');
-const util = require('../lib/util');
+const util = require('../utils/util');
 const path = require('path');
 const _ = require('lodash');
 const Concat = require('concat-with-sourcemaps');
