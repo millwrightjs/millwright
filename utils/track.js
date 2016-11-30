@@ -1,24 +1,28 @@
 const _ = require('lodash');
-const timers = {};
+const timer = {};
 
-module.exports = track;
+module.exports = {trackPipe};
 
-function track(value, fn, fnId, index, length, wrapped) {
+function trackPipe(...args) {
+  return _.curry(track)(Symbol(), ...args);
+}
+
+function track(fnId, fn, value, trackedFn, length) {
   const id = Symbol();
   report(fnId, id, fn, length);
-  const result = wrapped(value);
+  const result = trackedFn(value);
   _.isPromise(result) ? result.then(() => report(fnId, id)) : report(fnId, id);
   return result;
 }
 
 function report(fnId, id, fn, length) {
-  if (!timers.startTime) {
-    timers.startTime = Date.now();
+  if (!timer.startTime) {
+    timer.startTime = Date.now();
   }
 
-  if (!timers[fnId]) {
+  if (!timer[fnId]) {
     const fnString = fn.toString();
-    timers[fnId] = {
+    timer[fnId] = {
       name: fnString.slice(fnString.indexOf(' '), fnString.indexOf('(')),
       startTime: Date.now(),
       count: 0,
@@ -26,10 +30,10 @@ function report(fnId, id, fn, length) {
     };
   }
 
-  timers[fnId].count++;
+  timer[fnId].count++;
 
-  if (timers[fnId].count === timers[fnId].length * 2) {
-    timers[fnId].time = Date.now() - timers[fnId].startTime;
-    console.log(`${timers[fnId].name} finished at ${((Date.now() - timers.startTime)/1000).toFixed(1)}s`);
+  if (timer[fnId].count === timer[fnId].length * 2) {
+    timer[fnId].time = Date.now() - timer[fnId].startTime;
+    console.log(`${timer[fnId].name} finished at ${((Date.now() - timer.startTime)/1000).toFixed(3)}s`);
   }
 }

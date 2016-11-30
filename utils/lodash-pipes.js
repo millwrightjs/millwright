@@ -1,5 +1,5 @@
 const _ = require('lodash');
-const track = require('./track.js');
+const {trackPipe} = require('./track.js');
 
 _.mixin({
   pipe,
@@ -19,15 +19,12 @@ function pipe(coll, fn, cond, when) {
     return coll;
   }
 
-  const fnId = Symbol();
+  const getTrackingDetails = trackPipe();
 
   const pipeValues = _.curry((coll, fn, cond) => {
     return _.map(coll, (value, index, coll) => {
-      const iterate = val => cond(val) ? fn(val) : val;
-      if (_.isPromise(value)) {
-        return value.then(val => track(val, fn, fnId, index, coll.length, iterate));
-      }
-      return track(value, fn, fnId, index, coll.length, iterate);
+      const track = getTrackingDetails(fn, _, val => cond(val) ? fn(val) : val, coll.length);
+      return _.isPromise(value) ? value.then(track) : track(value);
     });
   });
 
@@ -37,7 +34,8 @@ function pipe(coll, fn, cond, when) {
 function pipeAll(coll, fn, _when) {
   const when = arguments.length === 3 ? _when : true;
   if (when) {
-    return _.isPromise(coll) ? coll.then(fn) : Promise.all(_.castArray(coll)).then(fn);
+    const track = trackPipe(fn, _, fn, 1);
+    return _.isPromise(coll) ? coll.then(track) : Promise.all(_.castArray(coll)).then(track);
   }
   return coll;
 }
@@ -45,7 +43,8 @@ function pipeAll(coll, fn, _when) {
 function pipeTap(coll, fn, _when) {
   const when = arguments.length === 3 ? _when : true;
   if (when) {
-    _.isPromise(coll) ? coll.then(fn) : Promise.all(_.castArray(coll)).then(fn);
+    const track = trackPipe(fn, _, fn, 1);
+    _.isPromise(coll) ? coll.then(track) : Promise.all(_.castArray(coll)).then(track);
   }
   return coll;
 }
