@@ -6,12 +6,12 @@ const contentful = require('contentful');
 const marked = require('marked');
 const moment = require('moment');
 const handlebars = require('handlebars');
-const {whicheverExists} = require('../utils/util');
 
 module.exports = static;
 
 function static(watchFiles, files) {
-  return getViews(config.contentful, files).then(() => watchFiles);
+  const views = getViews(config.contentful, files);
+  return _.isPromise(views) ? views.then(() => watchFiles) : watchFiles;
 }
 
 function getViews(keys, assetPaths) {
@@ -25,12 +25,7 @@ function getContent(keys, assetPaths) {
 }
 
 function pages(viewData) {
-  const wrapperTemplatePath = whicheverExists('src/wrapper.hbs', 'src/page.hbs');
-
-  if (!wrapperTemplatePath) {
-    return;
-  }
-
+  const wrapperTemplatePath = 'src/wrapper.hbs';
   const templatesDir = 'src/pages';
   const partialsDir = 'src/partials';
   const outputDir = 'dest';
