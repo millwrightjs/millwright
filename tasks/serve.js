@@ -12,7 +12,7 @@ function serve(opts) {
     const chokidarOpts = {ignored: path.join(process.cwd(), config.destBase, '**')};
 
     chokidar.watch(Object.keys(watchFiles), chokidarOpts).on('change', (_path) => {
-      make({watch: true, paths: [{path: watchFiles[_path]}]}).then(destPaths => {
+      make({watch: true, paths: [{path: watchFiles[_path]}]})[0].then(destPaths => {
         bs.reload(destPaths);
       });
     });

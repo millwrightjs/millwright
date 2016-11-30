@@ -18,12 +18,13 @@ function track(fnId, fn, value, trackedFn, length) {
 function report(fnId, id, fn, length) {
   if (!timer.startTime) {
     timer.startTime = Date.now();
+    console.log(`millin' ${length} files, hang tight...`);
   }
 
   if (!timer[fnId]) {
     const fnString = fn.toString();
     timer[fnId] = {
-      name: fnString.slice(fnString.indexOf(' '), fnString.indexOf('(')),
+      name: fnString.slice(fnString.indexOf(' ') + 1, fnString.indexOf('(')),
       startTime: Date.now(),
       count: 0,
       length
