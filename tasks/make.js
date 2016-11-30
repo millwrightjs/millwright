@@ -6,12 +6,14 @@ const plugins = _.mapValues(requireDir('../plugins', {camelcase: true}), _.curry
 module.exports = make;
 
 function make(opts = {}) {
-  clean();
 
   const watch = process.env.watch;
   const task = process.env.task || 'make';
-
   const watchFiles = {};
+
+  if (!watch) {
+    clean();
+  }
 
   return _(opts.paths || plugins.getAssets())
     .pipe(plugins.normalizePaths)
