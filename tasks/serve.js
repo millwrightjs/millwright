@@ -8,11 +8,12 @@ module.exports = serve;
 
 function serve(opts) {
   if (opts && opts.watchFiles) {
+    process.env.watch = true;
     const {watchFiles} = opts;
     const chokidarOpts = {ignored: path.join(process.cwd(), config.destBase, '**')};
 
     chokidar.watch(Object.keys(watchFiles), chokidarOpts).on('change', (_path) => {
-      make({watch: true, paths: [{path: watchFiles[_path]}]})[0].then(destPaths => {
+      make({paths: [{path: watchFiles[_path]}]})[0].then(destPaths => {
         bs.reload(destPaths);
       });
     });

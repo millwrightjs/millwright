@@ -5,16 +5,15 @@ const plugins = _.mapValues(requireDir('../plugins', {camelcase: true}), _.curry
 
 module.exports = make;
 
-function make(opts) {
+function make(opts = {}) {
   clean();
 
-  opts = opts || {};
-  const {paths, watch} = opts;
-  const task = process.env.task = process.env.task || 'make';
+  const watch = process.env.watch;
+  const task = process.env.task || 'make';
 
   const watchFiles = {};
 
-  return _(paths || plugins.getAssets())
+  return _(opts.paths || plugins.getAssets())
     .pipe(plugins.normalizePaths)
     .pipe(plugins.read, a => a.isCode)
     .pipe(plugins.promisify, a => !a.isCode)

@@ -16,6 +16,10 @@ function track(fnId, fn, value, trackedFn, length) {
 }
 
 function report(fnId, id, fn, length) {
+  if (process.env.watch) {
+    return;
+  }
+
   if (!timer.startTime) {
     timer.startTime = Date.now();
     console.log(`millin' ${length} files, hang tight...`);
