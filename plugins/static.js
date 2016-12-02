@@ -5,7 +5,7 @@ const config = require('../config');
 const contentful = require('contentful');
 const marked = require('marked');
 const moment = require('moment');
-const handlebars = require('handlebars');
+const mustache = require('mustache');
 
 module.exports = static;
 
@@ -25,41 +25,35 @@ function getContent(keys, assetPaths) {
 }
 
 function pages(viewData) {
-  const wrapperTemplatePath = 'src/wrapper.hbs';
-  const templatesDir = 'src/pages';
-  const partialsDir = 'src/partials';
-  const outputDir = 'dest';
+  const {wrapperPath, pagesDir, partialsDir} = config;
+  const outputDir = config.destBase;
 
-  const wrapperTemplate = fs.readFileSync(wrapperTemplatePath).toString();
-  const templateFileNames = fs.readdirSync(templatesDir);
+  const wrapperTemplate = fs.readFileSync(wrapperPath).toString();
+  const templateFileNames = fs.readdirSync(pagesDir);
   const partialFileNames = _.attemptSilent(fs.readdirSync, partialsDir);
 
-  registerPartials();
-
+  const partials = getPartials();
   const pages = getPages();
 
   pages.forEach(page => fs.outputFileSync(path.join(outputDir, page.name), page.html));
 
-  function registerPartials() {
-    _.forEach(partialFileNames, partialFileName => {
-      const name = path.basename(partialFileName, '.hbs');
+  function getPartials() {
+    return _.reduce(partialFileNames, (obj, partialFileName) => {
+      const name = path.basename(partialFileName, '.mustache');
       const partialPath = path.join(partialsDir, partialFileName);
-      const partial = fs.readFileSync(partialPath).toString();
-      handlebars.registerPartial(name, partial);
-    });
+      obj[name] = fs.readFileSync(partialPath).toString();
+      return obj;
+    }, {});
   }
 
   function getPages() {
     return templateFileNames.map(templateFileName => {
-      const templatePath = path.join(templatesDir, templateFileName);
+      const templatePath = path.join(pagesDir, templateFileName);
       const template = fs.readFileSync(templatePath).toString();
-      handlebars.registerPartial('page', template);
-      const rendered = {
-        name: path.basename(templateFileName, '.hbs') + '.html',
-        html: handlebars.compile(wrapperTemplate)(viewData)
+      return {
+        name: path.basename(templateFileName, '.mustache') + '.html',
+        html: mustache.render(wrapperTemplate, viewData, _.assign(partials, {page: template}))
       };
-      handlebars.unregisterPartial('page');
-      return rendered;
     });
   }
 }

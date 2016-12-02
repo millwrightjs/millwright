@@ -11,7 +11,10 @@ const defaults = {
   servePort: 8080,
   servePath: 'http://localhost:8080',
   defaultCommand: 'dev',
-  templateIgnoredBasePaths: ['src', 'bower_components', 'node_modules']
+  templateIgnoredBasePaths: ['src', 'bower_components', 'node_modules'],
+  wrapperPath: 'src/wrapper.mustache',
+  partialsDir: 'src/partials',
+  pagesDir: 'src/pages'
 }
 
 defaults.serveMsg = 'Millwright serving at ' + defaults.servePath + '...';
