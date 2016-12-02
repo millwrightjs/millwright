@@ -1,15 +1,19 @@
 const fs = require('fs-extra');
 const _ = require('lodash');
 const path = require('path');
+const config = require('../config');
 
 module.exports = getAssets;
 
 function getAssets() {
-  const pathsSource = 'src/wrapper.json';
-  const assetGroups = _.mapValues(fs.readJsonSync(pathsSource), paths => {
-    return _.map(paths, _path => path.normalize(path.join(path.dirname(pathsSource), _path)));
+  const {wrapperDataPath} = config;
+  const assetGroups = _.mapValues(fs.readJsonSync(wrapperDataPath).files, group => {
+    return _.map(group, file => {
+      return path.normalize(path.join(path.dirname(wrapperDataPath), file));
+    });
   });
 
-  return _(assetGroups)
-    .map((assetGroup, groupKey) => _.map(assetGroup, path => ({groupKey, path}))).flatten().value();
+  return _(assetGroups).map((assetGroup, groupKey) => {
+    return _.map(assetGroup, path => ({groupKey, path}));
+  }).flatten().value();
 }

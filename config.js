@@ -13,6 +13,7 @@ const defaults = {
   defaultCommand: 'dev',
   templateIgnoredBasePaths: ['src', 'bower_components', 'node_modules'],
   wrapperPath: 'src/wrapper.mustache',
+  wrapperDataPath: 'src/wrapper.json',
   partialsDir: 'src/partials',
   pagesDir: 'src/pages'
 }

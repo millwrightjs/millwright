@@ -24,13 +24,15 @@ function getContent(keys, assetPaths) {
   });
 }
 
-function pages(viewData) {
+function pages(assetPaths) {
   const {wrapperPath, pagesDir, partialsDir} = config;
   const outputDir = config.destBase;
 
-  const wrapperTemplate = fs.readFileSync(wrapperPath).toString();
+  const wrapperTemplate = fs.readFileSync(wrapperPath, 'utf8');
   const templateFileNames = fs.readdirSync(pagesDir);
   const partialFileNames = _.attemptSilent(fs.readdirSync, partialsDir);
+  const wrapperData = fs.readJsonSync(config.wrapperDataPath);
+  wrapperData.files = assetPaths;
 
   const partials = getPartials();
   const pages = getPages();
@@ -49,9 +51,18 @@ function pages(viewData) {
   function getPages() {
     return templateFileNames.map(templateFileName => {
       const templatePath = path.join(pagesDir, templateFileName);
-      const template = fs.readFileSync(templatePath).toString();
+      const templateFileNameStripped = path.basename(templateFileName, '.mustache');
+      const template = fs.readFileSync(templatePath, 'utf8');
+      const pageViewDataPath = path.join(pagesDir, templateFileNameStripped + '.json');
+      const pageViewData = _.attemptSilent(fs.readJsonSync, pageViewDataPath);
+      const viewData = pageViewData ? _.assign({}, wrapperData, pageViewData) : wrapperData;
+
+      if (_.get(pageViewData, 'files')) {
+        viewData.files = _.assign({}, wrapperData.files, pageViewData.files);
+      }
+
       return {
-        name: path.basename(templateFileName, '.mustache') + '.html',
+        name: templateFileNameStripped + '.html',
         html: mustache.render(wrapperTemplate, viewData, _.assign(partials, {page: template}))
       };
     });
