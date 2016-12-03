@@ -26,47 +26,54 @@ function getContent(keys, assetPaths) {
 
 function pages(assetPaths) {
   const {wrapperPath, pagesDir, partialsDir} = config;
-  const outputDir = config.destBase;
 
+  const pagesDirs = _(fs.walkSync(pagesDir)).map(path.dirname).uniq().pull(path.dirname(pagesDir)).value();
   const wrapperTemplate = fs.readFileSync(wrapperPath, 'utf8');
-  const templateFileNames = fs.readdirSync(pagesDir);
   const partialFileNames = _.attemptSilent(fs.readdirSync, partialsDir);
   const wrapperData = fs.readJsonSync(config.wrapperDataPath);
   wrapperData.files = assetPaths;
 
-  const partials = getPartials();
-  const pages = getPages();
+  pagesDirs.forEach(dir => {
+    const outputDir = path.join(config.destBase, path.relative(pagesDir, dir));
+    const templateFileNames = fs.readdirSync(dir)
+      .filter(entity => fs.statSync(path.join(dir, entity)).isFile());
 
-  pages.forEach(page => fs.outputFileSync(path.join(outputDir, page.name), page.html));
+    const partials = getPartials();
+    const pages = getPages();
 
-  function getPartials() {
-    return _.reduce(partialFileNames, (obj, partialFileName) => {
-      const name = path.basename(partialFileName, '.mustache');
-      const partialPath = path.join(partialsDir, partialFileName);
-      obj[name] = fs.readFileSync(partialPath).toString();
-      return obj;
-    }, {});
-  }
+    pages.forEach(page => fs.outputFileSync(path.join(outputDir, page.name), page.html));
 
-  function getPages() {
-    return templateFileNames.map(templateFileName => {
-      const templatePath = path.join(pagesDir, templateFileName);
-      const templateFileNameStripped = path.basename(templateFileName, '.mustache');
-      const template = fs.readFileSync(templatePath, 'utf8');
-      const pageViewDataPath = path.join(pagesDir, templateFileNameStripped + '.json');
-      const pageViewData = _.attemptSilent(fs.readJsonSync, pageViewDataPath);
-      const viewData = pageViewData ? _.assign({}, wrapperData, pageViewData) : wrapperData;
+    function getPartials() {
+      return _.reduce(partialFileNames, (obj, partialFileName) => {
+        const name = path.basename(partialFileName, '.mustache');
+        const partialPath = path.join(partialsDir, partialFileName);
+        obj[name] = fs.readFileSync(partialPath).toString();
+        return obj;
+      }, {});
+    }
 
-      if (_.get(pageViewData, 'files')) {
-        viewData.files = _.assign({}, wrapperData.files, pageViewData.files);
-      }
+    function getPages() {
+      return templateFileNames.map(templateFileName => {
+        const templatePath = path.join(dir, templateFileName);
+        const templateFileNameStripped = path.basename(templateFileName, '.mustache');
+        const template = fs.readFileSync(templatePath, 'utf8');
+        const pageViewDataPath = path.join(dir, templateFileNameStripped + '.json');
+        const pageViewData = _.attemptSilent(fs.readJsonSync, pageViewDataPath);
+        const viewData = pageViewData ? _.assign({}, wrapperData, pageViewData) : wrapperData;
 
-      return {
-        name: templateFileNameStripped + '.html',
-        html: mustache.render(wrapperTemplate, viewData, _.assign(partials, {page: template}))
-      };
-    });
-  }
+        if (_.get(pageViewData, 'files')) {
+          viewData.files = _.mergeWith({}, wrapperData.files, pageViewData.files, (dest, src) => {
+            return [dest, src].every(_.isArray) ? _.union(dest, src) : undefined;
+          });
+        }
+
+        return {
+          name: templateFileNameStripped + '.html',
+          html: mustache.render(wrapperTemplate, viewData, _.assign(partials, {page: template}))
+        };
+      });
+    }
+  });
 }
 
 function parseContent(entries, calledRecursively) {
