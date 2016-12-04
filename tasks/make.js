@@ -1,4 +1,6 @@
 const _ = require('lodash');
+const promisify = require('promisify-node');
+const fs = promisify(require('fs-extra'));
 const clean = require('./clean');
 const requireDir = require('require-dir');
 const plugins = _.mapValues(requireDir('../plugins', {camelcase: true}), _.curry);
@@ -15,6 +17,12 @@ function make(opts = {}) {
     clean();
   }
 
+  const templates = _(plugins.getTemplatePaths())
+    .pipeAll(plugins.normalizeTemplatePaths)
+    .pipeLog()
+    .value();
+
+  /*
   return _(opts.paths || plugins.getSources)
     .pipeLog()
     .pipe(plugins.normalizePaths)
@@ -33,5 +41,6 @@ function make(opts = {}) {
     .pipe(plugins.toDestPath, watch)
     .pipeAll(plugins.static(task === 'make' ? {watchFiles} : null), !watch)
     .value();
+  */
 }
 

@@ -7,7 +7,8 @@ module.exports = {
   getOrdinal,
   getType,
   whicheverExists,
-  stripIgnoredBasePath
+  stripIgnoredBasePath,
+  changeExt
 };
 
 function getCompiledType(type) {
@@ -54,4 +55,8 @@ function stripIgnoredBasePath(_path, basePaths) {
   const ignored = basePaths.find(base => _.startsWith(trimmedPath, _.trimEnd(base, './\\')));
   const ignoredLength = ignored ? (ignored + path.sep).length : 0;
   return  trimmedPath.substring(ignoredLength);
+}
+
+function changeExt(file, fromExt, toExt) {
+  return path.join(path.dirname(file), path.basename(file, fromExt) + toExt);
 }
