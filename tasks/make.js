@@ -15,7 +15,8 @@ function make(opts = {}) {
     clean();
   }
 
-  return _(opts.paths || plugins.getAssets())
+  return _(opts.paths || plugins.getSources)
+    .pipeLog()
     .pipe(plugins.normalizePaths)
     .pipe(plugins.read, a => a.isCode)
     .pipe(plugins.promisify, a => !a.isCode)
