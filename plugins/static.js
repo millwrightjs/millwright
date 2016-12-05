@@ -3,27 +3,35 @@ const fs = require('fs-extra');
 const path = require('path');
 const config = require('../config');
 const mustache = require('mustache');
+const {changeExt} = require('../utils/util');
+const cache = require('../utils/cache');
 
 const partialFileNames = _.attemptSilent(fs.readdirSync, config.partialsDir);
 const partials = _.reduce(partialFileNames, (obj, partialFileName) => {
-    const name = path.basename(partialFileName, '.mustache');
-    const partialPath = path.join(partialsDir, partialFileName);
-    obj[name] = fs.readFileSync(partialPath).toString();
-    return obj;
-  }, {});
-
-const cache = {};
+  const name = path.basename(partialFileName, '.mustache');
+  const partialPath = path.join(partialsDir, partialFileName);
+  obj[name] = fs.readFileSync(partialPath).toString();
+  return obj;
+}, {});
 
 module.exports = static;
 
 function static(template) {
-  cacheWrapper(template);
-  const wrapper = cache[template.wrapper];
-  const wrapperData = cache[template.wrapperData];
+  const wrapper = _.has(template, 'wrapper') ? cache.get(template.wrapper) : '';
+  const wrapperData = _.has(template, 'wrapperData') ? cache.get(template.wrapperData) : {};
+
+  // We'll update cache.get to except a function as second arg to transform the file content
+  // prior to caching. In this case we'll do pass in the asset normalization plugin. The resulting
+  // normalized files property will be useful for both static gen and the asset pipeline.
+  //
+  // We'll just map to the 'webPath' value each time we access a cached json file.
 
   const page = fs.readFileSync(template.src, 'utf8');
-  const templateData = _.attemptSilent(fs.readJsonSync, template.data) || {};
+  const templateData = cache.get(changeExt(template.src, '.mustache', '.json')) || {};
   const data = _.assign({}, wrapperData, templateData);
+
+  wrapperData.files = _.mapValues(wrapperData.files, 'webPath');
+  templateData.files = _.mapValues(templateData.files, 'webPath');
 
   if (_.has(wrapperData, 'files') && _.has(templateData, 'files')) {
     data.files = _.mergeWith({}, wrapperData.files, templateData.files, (dest, src) => {
@@ -33,13 +41,4 @@ function static(template) {
 
   const result = mustache.render(wrapper, data, _.assign({}, partials, {page}));
   fs.outputFileSync(template.dest, result);
-}
-
-function cacheWrapper(template) {
-  if (template.wrapper && !cache[template.wrapper]) {
-    cache[template.wrapper] = _.attemptSilent(fs.readFileSync, template.wrapper, 'utf8');
-  }
-  if (template.wrapperData && !cache[template.wrapperData]) {
-    cache[template.wrapperData] = _.attemptSilent(fs.readJsonSync, template.wrapperData, 'utf8');
-  }
 }

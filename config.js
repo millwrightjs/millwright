@@ -7,7 +7,7 @@ const config = _.attemptSilent(fs.readJsonSync, configPath);
 
 const defaults = {};
 defaults.destBase = 'dest';
-defaults.serveRoot = defaults.serveRoot;
+defaults.serveRoot = defaults.destBase;
 defaults.servePort = 8080;
 defaults.servePath = 'http://localhost:' + defaults.servePort;
 defaults.defaultCommand = 'dev';

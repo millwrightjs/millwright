@@ -8,11 +8,11 @@ module.exports = normalizeTemplatePaths;
 function normalizeTemplatePaths(templatePathObj) {
   const {templatePaths, templateDataPaths} = templatePathObj[0];
 
-  return templatePaths.map(templatePath => {
+  return templatePaths.filter(p => path.basename(p) !== 'wrapper.mustache').map(templatePath => {
     const srcStripped = stripIgnoredBasePath(templatePath, config.templateIgnoredBasePaths);
     const result = {
       src: templatePath,
-      dest: path.join(config.destBase, changeExt(srcStripped, '.mustache', '.html'))
+      dest: path.join(config.destBase, changeExt(srcStripped, '.mustache', '.html')),
     };
 
     let wrapperDirCheck = templatePath;

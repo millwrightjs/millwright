@@ -5,15 +5,13 @@ const config = require('../config');
 
 module.exports = getAssets;
 
-function getAssets() {
-  const {wrapperDataPath} = config;
-  const assetGroups = _.mapValues(fs.readJsonSync(wrapperDataPath).files, group => {
-    return _.map(group, file => {
-      return path.normalize(path.join(path.dirname(wrapperDataPath), file));
+function getAssets(filesObject) {
+  return _(filesObject).map((groups, key) => {
+    const basePath = path.dirname(key);
+    return _.map(groups, (group, groupKey) => {
+      return _.map(group, assetPath => {
+        return {groupKey, path: path.normalize(path.join(basePath, assetPath))};
+      });
     });
-  });
-
-  return _(assetGroups).map((assetGroup, groupKey) => {
-    return _.map(assetGroup, path => ({groupKey, path}));
-  }).flatten().value();
+  }).flattenDeep().value();
 }
