@@ -61,9 +61,11 @@ function normalize(ref) {
   ref.shouldMinify = !ref.isMinified && ref.isCode;
 
   // Group attributes for minification/concatenation
+  const pagePrefix = ref.wrapper ? path.basename(ref.dataFilePath, '.json') + '-' : '';
+
   ref.destExtMin = '.min' + ref.destExt;
   ref.groupDestDir = config.destBase;
-  ref.groupDestFilename = ref.groupKey + ref.destExtMin;
+  ref.groupDestFilename = pagePrefix + ref.groupKey + ref.destExtMin;
   ref.groupDestFilenameMin = ref.groupDestFilename;
   ref.groupDestPath = path.join(ref.groupDestDir, ref.groupDestFilename);
   ref.groupDestPathMin = ref.groupDestPath;

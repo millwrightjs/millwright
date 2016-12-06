@@ -20,18 +20,13 @@ function static(template) {
   const wrapper = _.has(template, 'wrapper') ? cache.get(template.wrapper) : '';
   const wrapperData = _.has(template, 'wrapperData') ? cache.get(template.wrapperData) : {};
 
-  // We'll update cache.get to except a function as second arg to transform the file content
-  // prior to caching. In this case we'll do pass in the asset normalization plugin. The resulting
-  // normalized files property will be useful for both static gen and the asset pipeline.
-  //
-  // We'll just map to the 'webPath' value each time we access a cached json file.
-
   const page = fs.readFileSync(template.src, 'utf8');
   const templateData = cache.get(changeExt(template.src, '.mustache', '.json')) || {};
-  const data = _.assign({}, wrapperData, templateData);
 
-  wrapperData.files = _.mapValues(wrapperData.files, 'webPath');
-  templateData.files = _.mapValues(templateData.files, 'webPath');
+  wrapperData.files = toWebPaths(wrapperData.files);
+  templateData.files = toWebPaths(templateData.files);
+
+  const data = _.assign({}, wrapperData, templateData);
 
   if (_.has(wrapperData, 'files') && _.has(templateData, 'files')) {
     data.files = _.mergeWith({}, wrapperData.files, templateData.files, (dest, src) => {
@@ -39,6 +34,19 @@ function static(template) {
     });
   }
 
+  console.log(data);
+
   const result = mustache.render(wrapper, data, _.assign({}, partials, {page}));
   fs.outputFileSync(template.dest, result);
+}
+
+function toWebPaths (assets) {
+  return _.chain(assets)
+    .reduce((acc, asset) => {
+      acc[asset.groupKey] = acc[asset.groupKey] || [];
+      acc[asset.groupKey].push(asset[process.env.task === 'build' ? 'groupWebPath' : 'webPath']);
+      return acc;
+    }, {})
+    .mapValues(_.uniq)
+    .value();
 }

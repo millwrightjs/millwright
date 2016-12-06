@@ -1,7 +1,6 @@
 const path = require('path');
 const config = require('../config');
 const {stripIgnoredBasePath, changeExt} = require('../utils/util');
-const cache = require('../utils/cache');
 
 module.exports = normalizeTemplatePaths;
 

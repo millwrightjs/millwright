@@ -3,16 +3,16 @@ const fs = require('fs-extra');
 const _ = require('lodash');
 const cache = {};
 
-module.exports = {get};
+module.exports = {get, dump};
 
-function get(file) {
-  const result = cache[file] || add(file);
+function get(file, transformer) {
+  const resolved = path.resolve(file);
+  const result = cache[resolved] || set(resolved, transformer);
   return _.isObject(result) ? _.assign({}, result) : result;
 }
 
-function add(file) {
-  const resolved = path.resolve(file);
-  const isJson = path.extname(resolved) === '.json';
+function set(file, transformer) {
+  const isJson = path.extname(file) === '.json';
   const readFn = isJson ? fs.readJsonSync : fs.readFileSync;
   const defaultValue = isJson ? {} : '';
 
@@ -20,6 +20,15 @@ function add(file) {
     return defaultValue;
   }
 
-  cache[resolved] = _.attemptSilent(readFn, resolved, 'utf8') || defaultValue;
-  return cache[resolved];
+  cache[file] = _.attemptSilent(readFn, file, 'utf8') || defaultValue;
+
+  if (transformer) {
+    cache[file] = transformer(cache[file]);
+  }
+
+  return cache[file];
+}
+
+function dump() {
+  return _.assign({}, cache);
 }

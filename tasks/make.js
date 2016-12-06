@@ -20,27 +20,31 @@ function make(opts = {}) {
   }
 
   const templates = plugins.getTemplatePaths();
-  templates.data = {};
-  templates.templateDataPaths.forEach(val => cache[val] = fs.readJsonSync(val));
 
-  templates.data = _.mapValues(templates.data, (value, key) => {
-    const basePath = path.dirname(key);
+  _.forEach(templates.templateDataPaths, val => {
+    const basePath = path.dirname(val);
+    const wrapper = path.basename(val, '.json') === 'wrapper';
 
-    if (_.has(value, 'files')) {
-      value.files = _(value.files).map((group, groupKey) => {
+    cache.get(val, data => {
+      const files = _(data.files).map((group, groupKey) => {
         return _.map(group, assetPath => {
-          return plugins.normalizePaths({
+          const result = plugins.normalizePaths({
             path: path.normalize(path.join(basePath, assetPath)),
-            groupKey
+            dataFilePath: val,
+            groupKey,
+            wrapper
           });
+
+          return result;
         });
       }).flatten().value();
-    }
 
-    return value;
+      return _.assign({}, data, {files});
+    });
   });
 
-  const assetPaths = opts.paths || _(templates.data).map('files').flatten().value();
+  const assetPaths = opts.paths || _(templates.templateDataPaths)
+    .map(val => cache.get(val)).map('files').flatten().value();
 
   const generateTemplates = _(templates)
     .pipeAll(plugins.normalizeTemplatePaths)
@@ -48,7 +52,6 @@ function make(opts = {}) {
     .value();
 
   const generateAssets = _(assetPaths)
-    .pipe(plugins.normalizePaths)
     .pipe(plugins.read, a => a.isCode)
     .pipe(plugins.promisify, a => !a.isCode)
     .pipe(plugins.transpile, a => a.isCode && !a.isMinified)
@@ -63,6 +66,6 @@ function make(opts = {}) {
     //.pipe(plugins.toDestPath, watch)
     .value();
 
-  return Promise.all([generateTemplates, generateAssets]);
+  return Promise.all(_.flatten([generateAssets, generateTemplates]));
 }
 

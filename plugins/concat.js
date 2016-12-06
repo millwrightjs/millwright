@@ -5,27 +5,25 @@ const _ = require('lodash');
 const Concat = require('concat-with-sourcemaps');
 
 module.exports = function concat(assets) {
-  const groupKeys = _(assets).map('groupKey').uniq().value();
+  const groupDestFilenames = _(assets).map('groupDestFilename').uniq().value();
 
-  return _.reduce(groupKeys, (acc, groupKey) => {
-    const group = _.filter(assets, {groupKey});
-    const sample = group[0];
-    const shouldConcat = _.every(group, asset => asset.isCode && asset.destType === sample.destType);
-    return _.concat(acc, shouldConcat ? concatenate(group) : group);
+  return _.reduce(groupDestFilenames, (acc, groupDestFilename) => {
+    const group = _.filter(assets, {groupDestFilename});
+    return _.concat(acc, concatenate(group));
   }, []);
 
   function concatenate(group) {
     const sample = group[0];
     const result = {};
 
-    result.destDir = config.destBase;
-    result.destFilename = sample.groupKey + sample.destExtMin;
-    result.destPath = path.join(result.destDir, result.destFilename);
+    result.destDir = sample.groupDestDir;
+    result.destFilename = sample.groupDestFilename;
+    result.destPath = sample.groupDestPath;
     result.groupKey = sample.groupKey;
     result.destType = sample.destType;
-    result.destFilenameMin = result.destFilename;
-    result.destPathMin = result.destPath;
-    result.webPath = result.destFilename;
+    result.destFilenameMin = sample.groupDestFilename;
+    result.destPathMin = sample.groupDestPath;
+    result.webPath = sample.groupDestPath;
     result.sourcemapPath = result.webPath + '.map';
     result.isCode = true;
 
