@@ -34,7 +34,10 @@ function static(template) {
     });
   }
 
-  const result = mustache.render(wrapper, data, _.assign({}, partials, {page}));
+  const pagePartials = wrapper ? _.assign({}, partials, {page}) : partials;
+
+  const result = mustache.render(wrapper || page, data, pagePartials);
+
   fs.outputFileSync(template.dest, result);
 }
 

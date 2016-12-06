@@ -24,9 +24,11 @@ function normalizeTemplatePaths(templatePathObj) {
       }
     }
 
-    const wrapperDataPath = changeExt(result.wrapper, '.mustache', '.json');
-    if (templateDataPaths.includes(wrapperDataPath)) {
-      result.wrapperData = wrapperDataPath;
+    if (result.wrapper) {
+      const wrapperDataPath = changeExt(result.wrapper, '.mustache', '.json');
+      if (templateDataPaths.includes(wrapperDataPath)) {
+        result.wrapperData = wrapperDataPath;
+      }
     }
 
     return result;

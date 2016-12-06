@@ -56,7 +56,6 @@ function make(opts = {}) {
   const assetPaths = opts.paths || _(templates.templateDataPaths)
     .map(val => cache.get(val)).map('files').flatten().value();
 
-
   const copyPassiveAssets = passiveAssets.map(asset => {
     const dest = path.join(config.destBase, stripIgnoredBasePath(asset, config.templateIgnoredBasePaths));
     return fs.copy(asset, dest);
