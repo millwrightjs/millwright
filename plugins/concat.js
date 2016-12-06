@@ -14,18 +14,17 @@ module.exports = function concat(assets) {
 
   function concatenate(group) {
     const sample = group[0];
-    const result = {};
-
-    result.destDir = sample.groupDestDir;
-    result.destFilename = sample.groupDestFilename;
-    result.destPath = sample.groupDestPath;
-    result.groupKey = sample.groupKey;
-    result.destType = sample.destType;
-    result.destFilenameMin = sample.groupDestFilename;
-    result.destPathMin = sample.groupDestPath;
-    result.webPath = sample.groupDestPath;
-    result.sourcemapPath = result.webPath + '.map';
-    result.isCode = true;
+    const result = {
+      destDir: sample.groupDestDir,
+      destFilename: sample.groupDestFilename,
+      destPath: sample.groupDestPath,
+      groupKey: sample.groupKey,
+      destType: sample.destType,
+      destFilenameMin: sample.groupDestFilename,
+      destPathMin: sample.groupDestPath,
+      webPath: sample.groupDestPath,
+      sourcemapPath: sample.groupSourcemapPath
+    };
 
     const c = new Concat(true, result.destPath, '\n');
     _.forEach(group, asset => {

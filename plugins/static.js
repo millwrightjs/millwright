@@ -34,8 +34,6 @@ function static(template) {
     });
   }
 
-  console.log(data);
-
   const result = mustache.render(wrapper, data, _.assign({}, partials, {page}));
   fs.outputFileSync(template.dest, result);
 }

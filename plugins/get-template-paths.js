@@ -5,8 +5,7 @@ const {changeExt} = require('../utils/util');
 
 module.exports = getTemplatePaths;
 
-function getTemplatePaths() {
-  const srcFiles = fs.walkSync(config.srcDir);
+function getTemplatePaths(srcFiles) {
   const templatePaths = srcFiles.filter(file => path.extname(file) === '.mustache');
   const templateDataPaths = templatePaths.reduce((acc, templatePath) => {
     const templateDataPath = changeExt(templatePath, '.mustache', '.json');
