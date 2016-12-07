@@ -5,7 +5,13 @@ module.exports = getWatchFiles;
 
 function getWatchFiles(watchFiles, assets) {
   _.forEach(assets, asset => {
-    watchFiles[path.resolve(asset.srcPath)] = asset.srcPath;
-    _.forEach(asset.mapImports, imported => watchFiles[path.resolve(imported)] = asset.srcPath);
+    watchFiles[path.resolve(asset.srcPath)] = {
+      path: asset.srcPath,
+      dataFilePath: asset.dataFilePath
+    };
+    _.forEach(asset.mapImports, imported => watchFiles[path.resolve(imported)] = {
+      path: asset.srcPath,
+      dataFilePath: asset.dataFilePath
+    });
   });
 }

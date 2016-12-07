@@ -17,9 +17,18 @@ function make(opts = {}) {
   const task = process.env.task || 'make';
   const watchFiles = {};
 
-  if (!watch) {
-    clean();
+  if (watch) {
+    const assets = opts.paths.map(asset => {
+      const props = {
+        basePath: path.dirname(asset.dataFilePath),
+        wrapper: path.basename(asset.dataFilePath, '.json') === 'wrapper'
+      }
+      return _.assign({}, asset, props);
+    });
+    return runGenerateAssets(assets);
   }
+
+  clean();
 
   const srcFiles = fs.walkSync(config.srcDir);
 
@@ -66,19 +75,24 @@ function make(opts = {}) {
     .pipe(plugins.static)
     .value();
 
-  const generateAssets = _(assetPaths)
-    .pipe(plugins.read)
-    .pipe(plugins.transpile, a => !a.isMinified)
-    .pipe(plugins.copySource)
-    .pipe(plugins.minify, a => !a.isMinified, task === 'build')
-    .pipe(plugins.remapSources(task), a => a.map)
-    .pipeAll(plugins.concat, task === 'build')
-    .pipe(plugins.outputSourcemaps)
-    .pipe(plugins.output)
-    //.pipeTap(plugins.getWatchFiles(watchFiles), task === 'make' && !watch)
-    //.pipe(plugins.toDestPath, watch)
-    .value();
+  const generateAssets = runGenerateAssets(assetPaths);
 
-  return Promise.all(_.flatten([generateAssets, generateTemplates, copyPassiveAssets]));
+  function runGenerateAssets(assets) {
+    return _(assets)
+      .pipe(plugins.normalizePaths, watch)
+      .pipe(plugins.read)
+      .pipe(plugins.transpile, a => !a.isMinified)
+      .pipe(plugins.copySource)
+      .pipe(plugins.minify, a => !a.isMinified, task === 'build')
+      .pipe(plugins.remapSources(task), a => a.map)
+      .pipeAll(plugins.concat, task === 'build')
+      .pipe(plugins.outputSourcemaps)
+      .pipe(plugins.output)
+      .pipeTap(plugins.getWatchFiles(watchFiles), task === 'make' && !watch)
+      .pipe(plugins.toDestPath, watch)
+      .value();
+  }
+
+  return Promise.all(_.flatten([generateAssets, generateTemplates, copyPassiveAssets])).then(() => ({watchFiles}));
 }
 
