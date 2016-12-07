@@ -5,10 +5,10 @@ const _ = require('lodash');
 const Concat = require('concat-with-sourcemaps');
 
 module.exports = function concat(assets) {
-  const groupDestFilenames = _(assets).map('groupDestFilename').uniq().value();
+  const groupWebPaths = _(assets).map('groupWebPath').uniq().value();
 
-  return _.reduce(groupDestFilenames, (acc, groupDestFilename) => {
-    const group = _.filter(assets, {groupDestFilename});
+  return _.reduce(groupWebPaths, (acc, groupWebPath) => {
+    const group = _.filter(assets, {groupWebPath});
     return _.concat(acc, concatenate(group));
   }, []);
 
