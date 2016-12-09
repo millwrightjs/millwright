@@ -7,7 +7,7 @@ const requireDir = require('require-dir');
 const plugins = _.mapValues(requireDir('../plugins', {camelcase: true}), _.curry);
 const cache = require('../utils/cache');
 const config = require('../config');
-const {getType, stripIgnoredBasePath} = require('../utils/util');
+const {getType, stripIgnoredBasePath, changeExt} = require('../utils/util');
 
 module.exports = make;
 
@@ -16,6 +16,16 @@ function make(opts = {}) {
   const watch = process.env.watch;
   const task = process.env.task || 'make';
   const watchFiles = {};
+
+  // 1. Walk src
+  // 2. Get path for each file (ignore active asset files)
+  // 3. Normalize each filename to an object describing the file
+  // 4. Cache the objects in a flat array
+  // 5. Read the relevant json (only those with same-named template sibling)
+  // 6. While reading in the json objects, iterate over the files properties
+  // 7. Repeat steps 3 & 4 for each asset in the files properties
+  // 8. If a file doesn't exist, error out
+  // 9. After reading, store the json object in a 'content' property in the related normalized object
 
   if (watch) {
     const assets = opts.paths.map(asset => {
@@ -30,13 +40,59 @@ function make(opts = {}) {
 
   clean();
 
-  const srcFiles = fs.walkSync(config.srcDir);
+  const srcDirResolved = path.resolve(config.srcDir);
+  const activeAssetTypes = ['css', 'js', 'coffee', 'less', 'styl', 'sass', 'scss'];
+  const srcFiles = fs.walkSync(config.srcDir)
+    .filter(src => {
+      return !activeAssetTypes.includes(_.trimStart(path.extname(src), '.'));
+    })
+    .map((src, index, files) => {
+      const normalized = path.parse(src);
+      const {dir, base, ext, name} = normalized;
+      const type = _.trimStart(ext, '.');
+      const parentDir = dir.slice(dir.lastIndexOf(path.sep) + path.sep.length);
+      const srcStripped = stripIgnoredBasePath(src, config.templateIgnoredBasePaths);
 
-  const activeAssetTypes = ['css', 'js', 'coffee', 'less', 'styl', 'sass', 'scss', 'mustache', 'json'];
-  const passiveAssets = _.remove(srcFiles, val => {
-    return !activeAssetTypes.includes(_.trimStart(path.extname(val), '.'));
-  });
+      normalized.src = src;
 
+      if (type === 'mustache') {
+        if (parentDir === 'partials') {
+          normalized.role = 'partial';
+        } else if (name === 'wrapper') {
+          normalized.role = 'wrapper';
+        } else {
+          normalized.role = 'template';
+          normalized.dest = path.join(config.destBase, changeExt(srcStripped, ext, '.html'));
+        }
+      }
+
+      return normalized;
+    })
+    .map((file, index, files) => {
+      if (file.role === 'template') {
+        const wrapper = getWrapper(file.src, files, srcDirResolved);
+        if (wrapper) {
+          file.wrapper = wrapper.src;
+          file.wrapperData = wrapper.data;
+        }
+      }
+
+      return file;
+    });
+
+  console.log(srcFiles);
+
+  function getWrapper(ref, files, srcRoot) {
+    const dir = path.dirname(ref);
+    return dir.length >= srcRoot.length && (files.find(f => {
+      return _.isMatch(f, {role: 'wrapper', dir});
+    }) || getWrapper(dir, files, srcRoot));
+  }
+
+
+
+
+  /*
   const templates = plugins.getTemplatePaths(srcFiles);
 
   _.forEach(templates.templateDataPaths, val => {
@@ -94,5 +150,6 @@ function make(opts = {}) {
   }
 
   return Promise.all(_.flatten([generateAssets, generateTemplates, copyPassiveAssets])).then(() => ({watchFiles}));
+ */
 }
 
