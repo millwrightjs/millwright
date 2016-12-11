@@ -17,16 +17,7 @@ function make(opts = {}) {
   const task = process.env.task || 'make';
   const watchFiles = {};
 
-  // 1. Walk src
-  // 2. Get path for each file (ignore active asset files)
-  // 3. Normalize each filename to an object describing the file
-  // 4. Cache the objects in a flat array
-  // 5. Read the relevant json (only those with same-named template sibling)
-  // 6. While reading in the json objects, iterate over the files properties
-  // 7. Repeat steps 3 & 4 for each asset in the files properties
-  // 8. If a file doesn't exist, error out
-  // 9. After reading, store the json object in a 'content' property in the related normalized object
-
+  /*
   if (watch) {
     const assets = opts.paths.map(asset => {
       const props = {
@@ -37,16 +28,39 @@ function make(opts = {}) {
     });
     return runGenerateAssets(assets);
   }
+ */
+
+  // 1. Walk src
+  // 2. Get path for each file (ignore active asset files)
+  // 3. Normalize each filename to an object describing the file
+  // 4. Cache the objects in a flat array
+  // 5. Read the relevant json (only those with same-named template sibling)
+  // 6. While reading in the json objects, iterate over the files properties
+  // 7. Repeat steps 3 & 4 for each asset in the files properties
+  // 8. If a file doesn't exist, error out
+  // 9. After reading, store the json object in a 'content' property in the related normalized object
+  //
+  // Implementation notes:
+  // When reading asset declarations from template data files, we can't deal with those paths the
+  // same way we deal with the paths retrieved when walking the tree. Walking the tree produces real
+  // paths of real files, always. The user declared files may not exist, or the path may be
+  // incorrect. Instead:
+  //
+  // 1. Read active assets along with everything else during the initial walk
+  // 2. Normalize the assets as type "asset", along with the other basic normalization steps
+  // 3. Read the file declaration group arrays, mapping the paths to web paths for template use
+  // 4. If a declared asset does not exist in the walked files array, throw an error
 
   clean();
 
   const srcDirResolved = path.resolve(config.srcDir);
   const activeAssetTypes = ['css', 'js', 'coffee', 'less', 'styl', 'sass', 'scss'];
-  const srcFiles = fs.walkSync(config.srcDir)
+  const srcFiles = _(fs.walkSync(config.srcDir))
     .filter(src => {
       return !activeAssetTypes.includes(_.trimStart(path.extname(src), '.'));
     })
-    .map((src, index, files) => {
+    .map((srcRaw, index, files) => {
+      const src = path.resolve(srcRaw);
       const normalized = path.parse(src);
       const {dir, base, ext, name} = normalized;
       const type = _.trimStart(ext, '.');
@@ -62,11 +76,22 @@ function make(opts = {}) {
           normalized.role = 'wrapper';
         } else {
           normalized.role = 'template';
-          normalized.dest = path.join(config.destBase, changeExt(srcStripped, ext, '.html'));
+          normalized.dest = path.join(config.destBase, changeExt(srcStripped, '.html'));
         }
       }
 
       return normalized;
+    })
+    .map((file, index, files) => {
+      if (file.role === 'wrapper') {
+        const data = _.find(files, {src: changeExt(file.src, '.json')});
+        if (data) {
+          data.role = 'data';
+          file.data = data.src;
+        }
+      }
+
+      return file;
     })
     .map((file, index, files) => {
       if (file.role === 'template') {
@@ -75,12 +100,25 @@ function make(opts = {}) {
           file.wrapper = wrapper.src;
           file.wrapperData = wrapper.data;
         }
+        const data = _.find(files, {src: changeExt(file.src, '.json')});
+        if (data) {
+          data.role = 'data';
+          file.data = data.src;
+        }
       }
 
       return file;
-    });
+    })
+    .map((file, index, files) => {
+      if (file.role === 'data') {
+        file.content = fs.readJsonSync(file.src);
+      }
 
-  console.log(srcFiles);
+      return file;
+    })
+    .value();
+
+    console.log(_.filter(srcFiles, {role: 'data'}));
 
   function getWrapper(ref, files, srcRoot) {
     const dir = path.dirname(ref);

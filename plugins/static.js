@@ -21,7 +21,7 @@ function static(template) {
   const wrapperData = _.has(template, 'wrapperData') ? cache.get(template.wrapperData) : {};
 
   const page = fs.readFileSync(template.src, 'utf8');
-  const templateData = cache.get(changeExt(template.src, '.mustache', '.json')) || {};
+  const templateData = cache.get(changeExt(template.src, '.json')) || {};
 
   wrapperData.files = toWebPaths(wrapperData.files);
   templateData.files = toWebPaths(templateData.files);

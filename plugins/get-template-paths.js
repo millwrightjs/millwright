@@ -8,7 +8,7 @@ module.exports = getTemplatePaths;
 function getTemplatePaths(srcFiles) {
   const templatePaths = srcFiles.filter(file => path.extname(file) === '.mustache');
   const templateDataPaths = templatePaths.reduce((acc, templatePath) => {
-    const templateDataPath = changeExt(templatePath, '.mustache', '.json');
+    const templateDataPath = changeExt(templatePath, '.json');
     return srcFiles.includes(templateDataPath) ? acc.concat(templateDataPath) : acc;
   }, []);
   return {templatePaths, templateDataPaths};

@@ -11,7 +11,7 @@ function normalizeTemplatePaths(templatePathObj) {
     const srcStripped = stripIgnoredBasePath(templatePath, config.templateIgnoredBasePaths);
     const result = {
       src: templatePath,
-      dest: path.join(config.destBase, changeExt(srcStripped, '.mustache', '.html')),
+      dest: path.join(config.destBase, changeExt(srcStripped, '.html')),
     };
 
     let wrapperDirCheck = templatePath;
@@ -25,7 +25,7 @@ function normalizeTemplatePaths(templatePathObj) {
     }
 
     if (result.wrapper) {
-      const wrapperDataPath = changeExt(result.wrapper, '.mustache', '.json');
+      const wrapperDataPath = changeExt(result.wrapper, '.json');
       if (templateDataPaths.includes(wrapperDataPath)) {
         result.wrapperData = wrapperDataPath;
       }

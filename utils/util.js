@@ -57,6 +57,7 @@ function stripIgnoredBasePath(_path, basePaths) {
   return  trimmedPath.substring(ignoredLength);
 }
 
-function changeExt(file, fromExt, toExt) {
-  return path.join(path.dirname(file), path.basename(file, fromExt) + toExt);
+function changeExt(file, toExt, fromExt) {
+  const {dir, name} = path.parse(file);
+  return path.join(dir, (fromExt ? path.basename(file, fromExt) : name) + toExt);
 }
