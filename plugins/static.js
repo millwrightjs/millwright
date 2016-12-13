@@ -6,48 +6,38 @@ const mustache = require('mustache');
 const {changeExt} = require('../utils/util');
 const cache = require('../utils/cache');
 
+module.exports = static;
+
 const partialFileNames = _.attemptSilent(fs.readdirSync, config.partialsDir);
 const partials = _.reduce(partialFileNames, (obj, partialFileName) => {
   const name = path.basename(partialFileName, '.mustache');
-  const partialPath = path.join(partialsDir, partialFileName);
+  const partialPath = path.join(config.partialsDir, partialFileName);
   obj[name] = fs.readFileSync(partialPath).toString();
   return obj;
 }, {});
 
-module.exports = static;
+function static(file, index, srcFiles) {
+  if (file.role !== 'template') {
+    return;
+  }
 
-function static(template) {
-  const wrapper = _.has(template, 'wrapper') ? cache.get(template.wrapper) : '';
-  const wrapperData = _.has(template, 'wrapperData') ? cache.get(template.wrapperData) : {};
+  const {src, data, wrapperData} = file;
 
-  const page = fs.readFileSync(template.src, 'utf8');
-  const templateData = cache.get(changeExt(template.src, '.json')) || {};
+  const wrapper = _.has(file, 'wrapper') ? fs.readFileSync(file.wrapper, 'utf8') : '';
 
-  wrapperData.files = toWebPaths(wrapperData.files);
-  templateData.files = toWebPaths(templateData.files);
+  const page = fs.readFileSync(src, 'utf8');
 
-  const data = _.assign({}, wrapperData, templateData);
+  const templateData = _.assign({}, _.find(srcFiles, {src: wrapperData}), _.find(srcFiles, {src: data}));
 
-  if (_.has(wrapperData, 'files') && _.has(templateData, 'files')) {
-    data.files = _.mergeWith({}, wrapperData.files, templateData.files, (dest, src) => {
+  if (_.has(wrapperData, 'files') && _.has(data, 'files')) {
+    templateData.files = _.mergeWith({}, wrapperData.files, data.files, (dest, src) => {
       return [dest, src].every(_.isArray) ? _.union(dest, src) : undefined;
     });
   }
 
   const pagePartials = wrapper ? _.assign({}, partials, {page}) : partials;
 
-  const result = mustache.render(wrapper || page, data, pagePartials);
+  const result = mustache.render(wrapper || page, templateData, pagePartials);
 
-  fs.outputFileSync(template.dest, result);
-}
-
-function toWebPaths (assets) {
-  return _.chain(assets)
-    .reduce((acc, asset) => {
-      acc[asset.groupKey] = acc[asset.groupKey] || [];
-      acc[asset.groupKey].push(asset[process.env.task === 'build' ? 'groupWebPath' : 'webPath']);
-      return acc;
-    }, {})
-    .mapValues(_.uniq)
-    .value();
+  fs.outputFileSync(file.dest, result);
 }

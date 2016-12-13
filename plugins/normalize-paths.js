@@ -6,11 +6,12 @@ const {getCompiledType, getType, stripIgnoredBasePath} = require('../utils/util'
 module.exports = normalize;
 
 function normalize(ref) {
-  const filename = path.basename(ref.path);
+  const src = path.relative(ref.baseDir, ref.src);
+  const filename = path.basename(src);
 
-  ref.srcPathStripped = stripIgnoredBasePath(ref.path, config.templateIgnoredBasePaths);
+  ref.srcPathStripped = stripIgnoredBasePath(src, config.templateIgnoredBasePaths);
   ref.srcDirStripped = path.dirname(ref.srcPathStripped);
-  ref.srcPath = ref.path;
+  ref.srcPath = src;
   ref.destPath = path.join(config.destBase, ref.srcPathStripped);
   ref.isFile = filename.includes('.');
 
@@ -61,9 +62,9 @@ function normalize(ref) {
   ref.shouldMinify = !ref.isMinified && ref.isCode;
 
   // Group attributes for minification/concatenation
-  const basePathStripped = stripIgnoredBasePath(ref.basePath, config.templateIgnoredBasePaths);
-  const pagePrefix = ref.wrapper ? '' : path.basename(ref.dataFilePath, '.json') + '-';
-  const groupWebPathPrefix = ref.wrapper ? '/' + basePathStripped : '';
+  const basePathStripped = stripIgnoredBasePath(ref.baseDir, config.templateIgnoredBasePaths);
+  const pagePrefix = ref.forWrapper ? '' : path.basename(ref.data, '.json') + '-';
+  const groupWebPathPrefix = ref.forWrapper ? '/' : '';
 
   ref.basePathStripped = basePathStripped;
   ref.destExtMin = '.min' + ref.destExt;
