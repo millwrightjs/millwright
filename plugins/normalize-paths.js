@@ -6,12 +6,11 @@ const {getCompiledType, getType, stripIgnoredBasePath} = require('../utils/util'
 module.exports = normalize;
 
 function normalize(ref) {
-  const src = path.relative(ref.baseDir, ref.src);
-  const filename = path.basename(src);
+  const filename = path.basename(ref.path);
 
-  ref.srcPathStripped = stripIgnoredBasePath(src, config.templateIgnoredBasePaths);
+  ref.srcPathStripped = stripIgnoredBasePath(ref.path, config.templateIgnoredBasePaths);
   ref.srcDirStripped = path.dirname(ref.srcPathStripped);
-  ref.srcPath = src;
+  ref.srcPath = ref.path;
   ref.destPath = path.join(config.destBase, ref.srcPathStripped);
   ref.isFile = filename.includes('.');
 

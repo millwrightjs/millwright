@@ -101,7 +101,7 @@ function make(opts = {}) {
           return group.reduce((acc, asset, index, coll) => {
             const result = plugins.normalizePaths({
               role: 'dep',
-              src: path.join(file.dir, asset),
+              path: path.normalize(path.join(file.dir, asset)),
               data: file.src,
               forWrapper: file.name === 'wrapper',
               baseDir: file.dir,
@@ -140,6 +140,8 @@ function make(opts = {}) {
   srcFiles.forEach(plugins.static);
 
   const generateAssets = runGenerateAssets(_.filter(srcFiles, {role: 'dep'}));
+
+  //console.log(_.filter(srcFiles, {role: 'dep'}));
 
   function runGenerateAssets(assets) {
     return _(assets)
