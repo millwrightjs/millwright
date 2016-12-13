@@ -35,14 +35,17 @@ function make(opts = {}) {
     .filter(src => {
       return !activeAssetTypes.includes(_.trimStart(path.extname(src), '.'));
     })
-    .map((srcRaw, index, files) => {
-      const src = path.resolve(srcRaw);
+    .map((src, index, files) => {
+      const srcResolved = path.resolve(src);
+      const dirResolved = path.dirname(srcResolved);
       const normalized = path.parse(src);
       const {dir, base, ext, name} = normalized;
       const type = _.trimStart(ext, '.');
       const parentDir = dir.slice(dir.lastIndexOf(path.sep) + path.sep.length);
 
       normalized.src = src;
+      normalized.srcResolved = srcResolved;
+      normalized.dirResolved = dirResolved;
       normalized.srcStripped = stripIgnoredBasePath(src, config.templateIgnoredBasePaths);
 
       if (type === 'mustache') {
@@ -60,10 +63,10 @@ function make(opts = {}) {
     })
     .map((file, index, files) => {
       if (file.role === 'wrapper') {
-        const data = _.find(files, {src: changeExt(file.src, '.json')});
+        const data = _.find(files, {srcResolved: changeExt(file.srcResolved, '.json')});
         if (data) {
           data.role = 'data';
-          file.data = data.src;
+          file.data = data.srcResolved;
         }
       }
 
@@ -71,7 +74,7 @@ function make(opts = {}) {
     })
     .map((file, index, files) => {
       if (file.role === 'template') {
-        const wrapper = getWrapper(file.src, files, srcDirResolved);
+        const wrapper = getWrapper(file.srcResolved, files, srcDirResolved);
         if (wrapper) {
           file.wrapper = wrapper.src;
           file.wrapperData = wrapper.data;
@@ -79,7 +82,7 @@ function make(opts = {}) {
         const data = _.find(files, {src: changeExt(file.src, '.json')});
         if (data) {
           data.role = 'data';
-          file.data = data.src;
+          file.data = data.srcResolved;
         }
       }
 
@@ -102,7 +105,7 @@ function make(opts = {}) {
             const result = plugins.normalizePaths({
               role: 'dep',
               path: path.normalize(path.join(file.dir, asset)),
-              data: file.src,
+              data: file.srcResolved,
               forWrapper: file.name === 'wrapper',
               baseDir: file.dir,
               groupKey: key
@@ -128,7 +131,7 @@ function make(opts = {}) {
   function getWrapper(ref, files, srcRoot) {
     const dir = path.dirname(ref);
     return dir.length >= srcRoot.length && (files.find(f => {
-      return _.isMatch(f, {role: 'wrapper', dir});
+      return _.isMatch(f, {role: 'wrapper', dirResolved: dir});
     }) || getWrapper(dir, files, srcRoot));
   }
 

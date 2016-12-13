@@ -21,13 +21,13 @@ function static(file, index, srcFiles) {
     return;
   }
 
-  const {src, data, wrapperData} = file;
-
+  const {src, data: dataPath, wrapperData: wrapperDataPath} = file;
   const wrapper = _.has(file, 'wrapper') ? fs.readFileSync(file.wrapper, 'utf8') : '';
-
   const page = fs.readFileSync(src, 'utf8');
 
-  const templateData = _.assign({}, _.find(srcFiles, {src: wrapperData}), _.find(srcFiles, {src: data}));
+  const data = _.get(_.find(srcFiles, {srcResolved: dataPath}), 'content');
+  const wrapperData = _.get(_.find(srcFiles, {srcResolved: wrapperDataPath}), 'content');
+  const templateData = _.assign({}, wrapperData, data);
 
   if (_.has(wrapperData, 'files') && _.has(data, 'files')) {
     templateData.files = _.mergeWith({}, wrapperData.files, data.files, (dest, src) => {
@@ -36,7 +36,6 @@ function static(file, index, srcFiles) {
   }
 
   const pagePartials = wrapper ? _.assign({}, partials, {page}) : partials;
-
   const result = mustache.render(wrapper || page, templateData, pagePartials);
 
   fs.outputFileSync(file.dest, result);
