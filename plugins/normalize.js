@@ -5,6 +5,7 @@ const fs = promisify(require('fs-extra'));
 const config = require('../config');
 const requireDir = require('require-dir');
 const plugins = _.mapValues(requireDir('../plugins', {camelcase: true}), _.curry);
+const cache = require('../utils/cache');
 const {getType, stripIgnoredBasePath, changeExt} = require('../utils/util');
 
 module.exports = normalize;
@@ -80,36 +81,27 @@ function normalize(paths) {
       }
       return file;
     })
-    .reduce((acc, file) => {
+    .map(file => {
       if (file.role === 'data' && file.content.files) {
-        const assets = [];
         file.content.files = _.mapValues(file.content.files, (group, key) => {
-          return group.reduce((acc, asset, index, coll) => {
-            const result = plugins.normalizePaths({
-              role: 'dep',
-              path: path.normalize(path.join(file.dir, asset)),
-              data: file.srcResolved,
-              forWrapper: file.name === 'wrapper',
-              baseDir: file.dir,
-              groupKey: key
-            });
-            assets.push(result);
-
-            if (task !== 'build') {
-              return acc.concat(result.webPath);
-            }
-
-            if (index === coll.length - 1) {
-              return acc.concat(result.groupWebPath);
-            }
-
-            return acc;
-          }, []);
+          return _(group)
+            .map((dep, index, deps) => {
+              const result = plugins.normalizePaths({
+                role: 'dep',
+                path: path.normalize(path.join(file.dir, dep)),
+                data: file.srcResolved,
+                forWrapper: file.name === 'wrapper',
+                baseDir: file.dir,
+                groupKey: key
+              });
+              cache.push('deps', result);
+              return result[task === 'build' ? 'groupWebPath' : 'webPath'];
+            }).uniq().value();
         });
-        acc = acc.concat(assets);
       }
-      return acc.concat(file);
-    }, []);
+      return file;
+    })
+    .value();
 }
 
 function getWrapper(ref, files, srcRoot) {

@@ -3,32 +3,17 @@ const fs = require('fs-extra');
 const _ = require('lodash');
 const cache = {};
 
-module.exports = {get, dump};
+module.exports = {get, set, push};
 
-function get(file, transformer) {
-  const resolved = path.resolve(file);
-  const result = cache[resolved] || set(resolved, transformer);
-  return _.isObject(result) ? _.assign({}, result) : result;
+function get(key, value) {
+  return cache[key];
 }
 
-function set(file, transformer) {
-  const isJson = path.extname(file) === '.json';
-  const readFn = isJson ? fs.readJsonSync : fs.readFileSync;
-  const defaultValue = isJson ? {} : '';
-
-  if (!file) {
-    return defaultValue;
-  }
-
-  cache[file] = _.attemptSilent(readFn, file, 'utf8') || defaultValue;
-
-  if (transformer) {
-    cache[file] = transformer(cache[file]);
-  }
-
-  return cache[file];
+function set(key, valueKey, values) {
+  cache[key] = cache[key] || {};
+  _.forEach(values, val => cache[key][val[valueKey]] = val);
 }
 
-function dump() {
-  return _.assign({}, cache);
+function push(key, values) {
+  cache[key] = (cache[key] || []).concat(_.castArray(values));
 }

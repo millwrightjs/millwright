@@ -11,7 +11,6 @@ const config = require('../config');
 module.exports = make;
 
 function make(opts = {}) {
-
   const watch = process.env.watch;
   const task = process.env.task || 'make';
   const watchFiles = {};
@@ -29,16 +28,16 @@ function make(opts = {}) {
 
   clean();
   const srcFiles = plugins.normalize(fs.walkSync(config.srcDir));
-  //cache.set(srcFiles);
+  cache.set('files', 'src', srcFiles);
 
-  const copyPassiveAssets = _.filter(srcFiles, {role: 'file'}).map(asset => {
+  const copyPassiveAssets = _.filter(cache.get('files'), {role: 'file'}).map(asset => {
     const dest = path.join(config.destBase, asset.srcStripped);
     return fs.copy(asset.src, dest);
   });
 
-  srcFiles.forEach(plugins.static);
+  _.forEach(cache.get('files'), plugins.static);
 
-  const generateAssets = runGenerateAssets(_.filter(srcFiles, {role: 'dep'}));
+  const generateAssets = runGenerateAssets(cache.get('deps'));
 
   function runGenerateAssets(assets) {
     return _(assets)
