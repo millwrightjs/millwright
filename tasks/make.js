@@ -13,7 +13,6 @@ module.exports = make;
 function make(opts = {}) {
   const watch = process.env.watch;
   const task = process.env.task || 'make';
-  const watchFiles = {};
 
   if (watch) {
     const assets = opts.paths.map(asset => {
@@ -50,11 +49,14 @@ function make(opts = {}) {
       .pipeAll(plugins.concat, task === 'build')
       .pipe(plugins.outputSourcemaps)
       .pipe(plugins.output)
+      .value();
+      /*
       .pipeTap(plugins.getWatchFiles(watchFiles), task === 'make' && !watch)
       .pipe(plugins.toDestPath, watch)
       .value();
+     */
   }
 
-  return Promise.all(_.flatten([generateAssets, copyPassiveAssets])).then(() => ({watchFiles}));
+  return Promise.all(_.flatten([generateAssets, copyPassiveAssets]));
 }
 

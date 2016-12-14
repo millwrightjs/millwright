@@ -5,8 +5,8 @@ const cache = {};
 
 module.exports = {get, set, push};
 
-function get(key, value) {
-  return cache[key];
+function get(key, valueKey) {
+  return valueKey ? cache[key][valueKey] : cache[key];
 }
 
 function set(key, valueKey, values) {

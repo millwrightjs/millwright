@@ -101,6 +101,13 @@ function normalize(paths) {
       }
       return file;
     })
+    .map(file => {
+      _.forEach(file.mapImports, imported => cache.push('imports', {
+        src: imported,
+        srcResolved: path.resolve(imported),
+        consumer: file.src
+      }));
+    })
     .value();
 }
 

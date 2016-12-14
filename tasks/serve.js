@@ -2,22 +2,17 @@ const path = require('path');
 const chokidar = require('chokidar');
 const bs = require('browser-sync').create();
 const config = require('../config');
+const cache = require ('../utils/cache');
 const make = require('./make');
 
 module.exports = serve;
 
-function serve(opts) {
-  if (opts && opts.watchFiles) {
-    process.env.watch = true;
-    const {watchFiles} = opts;
-    const chokidarOpts = {ignored: path.join(process.cwd(), config.destBase, '**')};
+function serve() {
+  process.env.watch = true;
 
-    chokidar.watch(Object.keys(watchFiles), chokidarOpts).on('change', (_path) => {
-      make({paths: [watchFiles[_path]]})[0].then(destPaths => {
-        bs.reload(destPaths);
-      });
-    });
-  }
+  const chokidarOpts = {
+    ignored: path.join(process.cwd(), config.destBase, '**')
+  };
 
   const bsOpts = {
     server: {
@@ -29,6 +24,24 @@ function serve(opts) {
     notify: false,
     ghostMode: false
   };
+
+  const paths = _(cache.get('files'))
+    .keys()
+    .concat(_.map(cache.get('imports'), 'srcResolved'))
+    .uniq()
+    .value();
+
+  chokidar.watch(paths, chokidarOpts).on('change', (changedPath) => {
+    const importConsumers = _(cache.get('imports'))
+      .filter({srcResolved: changedPath})
+      .map(imported => cache.get('files', imported.consumer))
+      .uniq().value();
+    const targets = importConsumers || cache.get('files', changedPath);
+
+    make({assets: targets}).then(() => {
+      bs.reload(changedPath);
+    });
+  });
 
   bs.init(bsOpts);
 }
