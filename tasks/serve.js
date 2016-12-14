@@ -19,5 +19,16 @@ function serve(opts) {
     });
   }
 
-  bs.init({server: config.serveRoot, notify: false, ghostMode: false});
+  const bsOpts = {
+    server: {
+      baseDir: config.serveRoot,
+      serveStaticOptions: {
+        extensions: ['html']
+      }
+    },
+    notify: false,
+    ghostMode: false
+  };
+
+  bs.init(bsOpts);
 }

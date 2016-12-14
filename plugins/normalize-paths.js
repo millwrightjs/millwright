@@ -63,7 +63,7 @@ function normalize(ref) {
   // Group attributes for minification/concatenation
   const basePathStripped = stripIgnoredBasePath(ref.baseDir, config.templateIgnoredBasePaths);
   const pagePrefix = ref.forWrapper ? '' : path.basename(ref.data, '.json') + '-';
-  const groupWebPathPrefix = ref.forWrapper ? '/' : '';
+  const groupWebPathPrefix = ref.forWrapper ? '/' + basePathStripped : '';
 
   ref.basePathStripped = basePathStripped;
   ref.destExtMin = '.min' + ref.destExt;
