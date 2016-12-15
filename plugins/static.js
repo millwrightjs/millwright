@@ -19,10 +19,6 @@ const partials = _.reduce(partialFileNames, (obj, partialFileName) => {
 }, {});
 
 function static(file, index, srcFiles) {
-  if (file.role !== 'template') {
-    return;
-  }
-
   const {src, data: dataPath, wrapperData: wrapperDataPath} = file;
   const wrapper = _.has(file, 'wrapper') ? fs.readFileSync(file.wrapper, 'utf8') : '';
   const page = fs.readFileSync(src, 'utf8');

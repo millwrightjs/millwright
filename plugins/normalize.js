@@ -16,9 +16,6 @@ function normalize(paths) {
   const srcDirResolved = path.resolve(config.srcDir);
 
   return _(paths)
-    .filter(src => {
-      return !activeAssetTypes.includes(_.trimStart(path.extname(src), '.'));
-    })
     .map(src => {
       const srcResolved = path.resolve(src);
       const dirResolved = path.dirname(srcResolved);
@@ -73,9 +70,6 @@ function normalize(paths) {
       return file;
     })
     .map(file => {
-      if (!file.role) {
-        file.role = 'file';
-      }
       if (file.role === 'data') {
         file.content = fs.readJsonSync(file.src);
       }

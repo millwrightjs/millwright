@@ -26,19 +26,25 @@ function make(opts = {}) {
   }
 
   clean();
-  const srcFiles = plugins.normalize(fs.walkSync(config.srcDir));
-  cache.set('files', 'src', srcFiles);
 
-  const copyPassiveAssets = _.filter(cache.get('files'), {role: 'file'}).map(asset => {
+  cache.set('files', 'src', plugins.normalize(fs.walkSync(config.srcDir)));
+
+  cache.get('deps').forEach(dep => {
+    cache.get('files')[dep.path.srcResolved].role = 'asset';
+  });
+
+  const copyPassiveAssets = cache.get('files').filter(f => !f.role).map(asset => {
     const dest = path.join(config.destBase, asset.srcStripped);
     return fs.copy(asset.src, dest);
   });
 
-  _.forEach(cache.get('files'), plugins.static);
+  _(cache.get('files')).filter({role: 'template'}).forEach(plugins.static);
 
-  const generateAssets = runGenerateAssets(cache.get('deps'));
+  const transformAssets = runTransformAssets(_.filter(cache.get('files'), {role: 'asset'}));
+  const generateDeps = runGenerateDeps(cache.get('deps'));
 
-  function runGenerateAssets(assets) {
+  // Iterate over files
+  function runTransformAssets(assets) {
     return _(assets)
       .pipe(plugins.normalizePaths, watch)
       .pipe(plugins.read)
@@ -46,15 +52,16 @@ function make(opts = {}) {
       .pipe(plugins.copySource)
       .pipe(plugins.minify, a => !a.isMinified, task === 'build')
       .pipe(plugins.remapSources(task), a => a.map)
+      .value();
+  }
+
+  // Iterate over deps
+  function runGenerateDeps(deps) {
+    return _(assets)
       .pipeAll(plugins.concat, task === 'build')
       .pipe(plugins.outputSourcemaps)
       .pipe(plugins.output)
       .value();
-      /*
-      .pipeTap(plugins.getWatchFiles(watchFiles), task === 'make' && !watch)
-      .pipe(plugins.toDestPath, watch)
-      .value();
-     */
   }
 
   return Promise.all(_.flatten([generateAssets, copyPassiveAssets]));
