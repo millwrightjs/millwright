@@ -11,6 +11,7 @@ function normalize(ref) {
   ref.srcPathStripped = stripIgnoredBasePath(ref.path, config.templateIgnoredBasePaths);
   ref.srcDirStripped = path.dirname(ref.srcPathStripped);
   ref.srcPath = ref.path;
+  ref.srcResolved = path.resolve(ref.path);
   ref.destPath = path.join(config.destBase, ref.srcPathStripped);
   ref.isFile = filename.includes('.');
 

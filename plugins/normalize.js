@@ -101,6 +101,7 @@ function normalize(paths) {
         srcResolved: path.resolve(imported),
         consumer: file.src
       }));
+      return file;
     })
     .value();
 }

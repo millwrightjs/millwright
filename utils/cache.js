@@ -11,7 +11,7 @@ function get(key, valueKey) {
 
 function set(key, valueKey, values) {
   cache[key] = cache[key] || {};
-  _.forEach(values, val => cache[key][val[valueKey]] = val);
+  _.forEach(_.castArray(values), val => cache[key][val[valueKey]] = val);
 }
 
 function push(key, values) {

@@ -8,21 +8,11 @@ const make = require('./make');
 module.exports = serve;
 
 function serve() {
+  /*
   process.env.watch = true;
 
   const chokidarOpts = {
     ignored: path.join(process.cwd(), config.destBase, '**')
-  };
-
-  const bsOpts = {
-    server: {
-      baseDir: config.serveRoot,
-      serveStaticOptions: {
-        extensions: ['html']
-      }
-    },
-    notify: false,
-    ghostMode: false
   };
 
   const paths = _(cache.get('files'))
@@ -42,6 +32,19 @@ function serve() {
       bs.reload(changedPath);
     });
   });
+
+ */
+
+  const bsOpts = {
+    server: {
+      baseDir: config.serveRoot,
+      serveStaticOptions: {
+        extensions: ['html']
+      }
+    },
+    notify: false,
+    ghostMode: false
+  };
 
   bs.init(bsOpts);
 }

@@ -18,13 +18,13 @@ const partials = _.reduce(partialFileNames, (obj, partialFileName) => {
   return obj;
 }, {});
 
-function static(file, index, srcFiles) {
+function static(file) {
   const {src, data: dataPath, wrapperData: wrapperDataPath} = file;
   const wrapper = _.has(file, 'wrapper') ? fs.readFileSync(file.wrapper, 'utf8') : '';
   const page = fs.readFileSync(src, 'utf8');
 
-  const data = _.get(_.find(srcFiles, {srcResolved: dataPath}), 'content');
-  const wrapperData = _.get(_.find(srcFiles, {srcResolved: wrapperDataPath}), 'content');
+  const data = _.get(cache.get('files', dataPath), 'content');
+  const wrapperData = _.get(cache.get('files', wrapperDataPath), 'content');
   const templateData = _.assign({}, wrapperData, data);
 
   if (_.has(wrapperData, 'files') && _.has(data, 'files')) {

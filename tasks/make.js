@@ -27,16 +27,18 @@ function make(opts = {}) {
 
   clean();
 
-  cache.set('files', 'src', plugins.normalize(fs.walkSync(config.srcDir)));
+  cache.set('files', 'srcResolved', plugins.normalize(fs.walkSync(config.srcDir)));
 
   cache.get('deps').forEach(dep => {
-    cache.get('files')[dep.path.srcResolved].role = 'asset';
+    cache.get('files')[dep.srcResolved].role = 'asset';
   });
 
-  const copyPassiveAssets = cache.get('files').filter(f => !f.role).map(asset => {
+  const copyPassiveAssets = _.filter(cache.get('files'), f => !f.role).map(asset => {
     const dest = path.join(config.destBase, asset.srcStripped);
     return fs.copy(asset.src, dest);
   });
+
+  // We should remove passive assets from the file cache by this point
 
   _(cache.get('files')).filter({role: 'template'}).forEach(plugins.static);
 
@@ -52,18 +54,19 @@ function make(opts = {}) {
       .pipe(plugins.copySource)
       .pipe(plugins.minify, a => !a.isMinified, task === 'build')
       .pipe(plugins.remapSources(task), a => a.map)
+      .pipe(asset => cache.set('files', 'srcResolved', asset))
       .value();
   }
 
   // Iterate over deps
   function runGenerateDeps(deps) {
-    return _(assets)
+    return _(deps)
       .pipeAll(plugins.concat, task === 'build')
       .pipe(plugins.outputSourcemaps)
       .pipe(plugins.output)
       .value();
   }
 
-  return Promise.all(_.flatten([generateAssets, copyPassiveAssets]));
+  return Promise.all(_.flatten([generateDeps, copyPassiveAssets]));
 }
 
