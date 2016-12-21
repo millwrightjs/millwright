@@ -26,6 +26,7 @@ function serve() {
       .filter({srcResolved: changedPath})
       .map(imported => cache.get('files', imported.consumer))
       .uniq().value();
+
     const targets = importConsumers || cache.get('files', changedPath);
 
     make({assets: targets}).then(() => {

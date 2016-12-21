@@ -10,20 +10,8 @@ const config = require('../config');
 
 module.exports = make;
 
-function make(opts = {}) {
-  const watch = process.env.watch;
+function make() {
   const task = process.env.task || 'make';
-
-  if (watch) {
-    const assets = opts.paths.map(asset => {
-      const props = {
-        basePath: path.dirname(asset.data),
-        wrapper: path.basename(asset.data, '.json') === 'wrapper'
-      }
-      return _.assign({}, asset, props);
-    });
-    return runGenerateAssets(assets);
-  }
 
   clean();
 
@@ -42,31 +30,21 @@ function make(opts = {}) {
 
   _(cache.get('files')).filter({role: 'template'}).forEach(plugins.static);
 
-  const transformAssets = runTransformAssets(_.filter(cache.get('files'), {role: 'asset'}));
-  const generateDeps = runGenerateDeps(cache.get('deps'));
+  const generateAssets = runGenerateAssets(_.filter(cache.get('files'), {role: 'asset'}));
 
-  // Iterate over files
-  function runTransformAssets(assets) {
+  function runGenerateAssets(assets) {
     return _(assets)
-      .pipe(plugins.normalizePaths, watch)
       .pipe(plugins.read)
       .pipe(plugins.transpile, a => !a.isMinified)
       .pipe(plugins.copySource)
       .pipe(plugins.minify, a => !a.isMinified, task === 'build')
       .pipe(plugins.remapSources(task), a => a.map)
-      .pipe(asset => cache.set('files', 'srcResolved', asset))
-      .value();
-  }
-
-  // Iterate over deps
-  function runGenerateDeps(deps) {
-    return _(deps)
       .pipeAll(plugins.concat, task === 'build')
       .pipe(plugins.outputSourcemaps)
       .pipe(plugins.output)
       .value();
   }
 
-  return Promise.all(_.flatten([generateDeps, copyPassiveAssets]));
+  return Promise.all(_.flatten([generateAssets, copyPassiveAssets]));
 }
 
