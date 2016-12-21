@@ -25,14 +25,14 @@ function normalize(ref) {
   ref.srcExt = path.extname(ref.srcFilename);
   ref.basename = path.basename(ref.srcFilename, ref.srcExt);
   ref.srcDir = path.dirname(ref.srcPath);
-  ref.srcType = getType(ref.srcExt);
-  ref.destType = ref.srcType;
+  ref.type = getType(ref.srcExt);
+  ref.destType = ref.type;
   ref.destExt = ref.srcExt;
   ref.destFilename = ref.srcFilename;
   ref.isMinified = path.extname(ref.basename) === '.min';
   ref.destDir = path.dirname(ref.destPath);
 
-  const compiledType = getCompiledType(ref.srcType);
+  const compiledType = getCompiledType(ref.type);
 
   if (compiledType) {
     ref.destType = compiledType;

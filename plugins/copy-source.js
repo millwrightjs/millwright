@@ -6,7 +6,7 @@ const config = require('../config');
 const util = require('../utils/util');
 
 module.exports = function copySource(file) {
-  const promises = [copyToSourcemaps(file.srcPath)];
+  const promises = [copyToSourcemaps(file.src)];
 
   if (file.map) {
     const parsedMap = _.isString(file.map) ? JSON.parse(file.map) : file.map;

@@ -15,18 +15,17 @@ module.exports = function concat(assets) {
   function concatenate(group) {
     const sample = group[0];
     const result = {
-      destDir: sample.groupDestDir,
+      dirDest: sample.groupDestDir,
       destFilename: sample.groupDestFilename,
-      destPath: sample.groupDestPath,
       groupKey: sample.groupKey,
       destType: sample.destType,
       destFilenameMin: sample.groupDestFilename,
-      destPathMin: sample.groupDestPath,
+      dest: sample.dest,
       webPath: sample.groupDestPath,
       sourcemapPath: sample.groupSourcemapPath
     };
 
-    const c = new Concat(true, result.destPath, '\n');
+    const c = new Concat(true, result.dest, '\n');
     _.forEach(group, asset => {
       const mappedPath = util.stripIgnoredBasePath(asset.srcPath, config.templateIgnoredBasePaths);
       c.add(mappedPath, asset.content, asset.map);

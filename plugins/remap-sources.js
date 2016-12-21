@@ -11,7 +11,7 @@ function remapSources(task, file) {
   parsedMap.sources = _.map(parsedMap.sources, source => {
     const strippedPath = util.stripIgnoredBasePath(source, config.templateIgnoredBasePaths);
     const buildPath = path.relative(file.basePathStripped, strippedPath);
-    return build ? buildPath : path.relative(file.destDir, path.join(config.destBase, strippedPath));
+    return build ? buildPath : path.relative(file.dirDest, path.join(config.destBase, strippedPath));
   });
   const map = JSON.stringify(_.pick(parsedMap, 'version', 'mappings', 'names', 'sources'));
   return _.assign(file, {map});

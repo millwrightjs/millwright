@@ -9,7 +9,7 @@ module.exports = function outputSourcemaps(file) {
   const mapPath = path.join(config.destBase, 'sourcemaps', file.sourcemapPath);
 
   // Append sourceMappingURL to file
-  const mapUrl = path.relative(file.destDir, mapPath);
+  const mapUrl = path.relative(file.dirDest, mapPath);
   const mapUrlStringBase = '# sourceMappingURL=' + mapUrl;
   const mapUrlString = file.destType === 'css' ? `/*${mapUrlStringBase} */` : `//${mapUrlStringBase}`;
   file.content += _.endsWith(file.content, '\n') ? mapUrlString : '\n' + mapUrlString;

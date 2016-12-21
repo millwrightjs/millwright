@@ -10,7 +10,7 @@ const postcss = require('postcss');
 const cssnext = require('postcss-cssnext');
 
 module.exports = function transpile(file) {
-  const transpiled = transpilers[file.srcType](file);
+  const transpiled = transpilers[file.type](file);
   return transpiled.then(result => _.assign(file, result));
 };
 
@@ -19,10 +19,10 @@ const transpilers = {sass, less, stylus, coffee, js, css};
 function sass(file) {
   return promisify(_sass.render)({
     data: file.content,
-    file: file.srcPath,
-    includePaths: [file.srcDir],
+    file: file.src,
+    includePaths: [file.dir],
     sourceMap: true,
-    outFile: file.basename,
+    outFile: file.name,
     omitSourceMapUrl: true
   })
   .then(result => ({
@@ -34,9 +34,9 @@ function sass(file) {
 
 function less(file) {
   return _less.render(file.content, {
-    filename: file.srcPath,
+    filename: file.src,
     sourceMap: {},
-    paths: [file.srcDir]
+    paths: [file.dir]
   })
   .then(result => ({
     content: result.css.toString(),
@@ -48,7 +48,7 @@ function less(file) {
 function stylus(file) {
   let result;
   const style = _stylus(file.content)
-    .set('filename', file.srcPath)
+    .set('filename', file.src)
     .set('sourcemap', {comment: false})
     .define('url', _stylus.resolver());
 
@@ -66,8 +66,8 @@ function stylus(file) {
 function coffee(file) {
   const opts = {
     sourceMap: true,
-    filename: file.srcPath,
-    sourceFiles: [file.srcPath]
+    filename: file.src,
+    sourceFiles: [file.src]
   };
   const compiled = _coffee.compile(file.content, opts);
   const result = {
@@ -80,10 +80,10 @@ function coffee(file) {
 function js(file) {
   const presets = arr => arr.map(name => path.join(__dirname, '../node_modules/babel-preset-' + name));
   const opts = {
-    filename: file.srcFilename,
+    filename: file.base,
     presets: presets(['es2015']),
     sourceMaps: true,
-    sourceFileName: file.srcPath,
+    sourceFileName: file.src,
     ast: false,
     compact: false
   };
@@ -98,7 +98,7 @@ function js(file) {
 function css(file) {
   return postcss([cssnext])
     .process(file.content, {
-      from: file.srcPath,
+      from: file.src,
       map: {
         prev: file.map,
         inline: false,

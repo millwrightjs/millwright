@@ -1,5 +1,4 @@
 const path = require('path');
-const _ = require('lodash');
 const config = require('../config');
 const {getCompiledType, getType, stripIgnoredBasePath} = require('../utils/util');
 
@@ -7,8 +6,8 @@ module.exports = getWebPath;
 
 function getWebPath(refPath, dataFile, groupKey) {
   const ref = path.parse(refPath);
-  const srcType = getType(ref.ext);
-  const compiledType = getCompiledType(srcType);
+  const type = getType(ref.ext);
+  const compiledType = getCompiledType(type);
 
   if (compiledType) {
     ref.ext = '.' + compiledType;
@@ -26,13 +25,13 @@ function getWebPath(refPath, dataFile, groupKey) {
 
     return path.join(pathBase, ref.base);
   } else {
-    ref.srcPathStripped = stripIgnoredBasePath(refPath, config.templateIgnoredBasePaths);
+    const srcStripped = stripIgnoredBasePath(refPath, config.templateIgnoredBasePaths);
     ref.isMinified = path.extname(ref.name) === '.min';
 
     if (ref.isMinified) {
       ref.name = path.basename(ref.name, '.min');
     }
 
-    return '/' + path.join(path.dirname(ref.srcPathStripped), ref.base);
+    return '/' + path.join(path.dirname(srcStripped), ref.base);
   }
 }
