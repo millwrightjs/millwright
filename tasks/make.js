@@ -33,7 +33,7 @@ function make() {
   const transformAssets = runTransformAssets(_.filter(cache.get('files'), {role: 'asset'}));
 
   const generateDeps = Promise.all(transformAssets).then(() => {
-    return Promise.all(runGenerateDeps(cache.get('deps')));
+    return Promise.all(_.castArray(runGenerateDeps(cache.get('deps'))));
   });
 
   function runTransformAssets(assets) {
@@ -44,7 +44,6 @@ function make() {
       .pipe(plugins.copySource)
       .pipe(plugins.minify, a => !a.isMinified, task === 'build')
       .pipe(plugins.remapSources(task), a => a.map)
-      .pipe(asset => cache.set('files', 'srcResolved', asset))
       .value();
   }
 

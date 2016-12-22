@@ -8,7 +8,7 @@ function normalizeDep(ref) {
   ref.srcStripped = stripIgnoredBasePath(ref.src, config.templateIgnoredBasePaths);
   ref.dirStripped = path.dirname(ref.srcStripped);
   ref.baseDest = ref.base;
-  ref.destExt = ref.ext;
+  ref.extDest = ref.ext;
   const type = getType(ref.ext);
   ref.typeDest = type;
   const compiledType = getCompiledType(type);
@@ -29,20 +29,17 @@ function normalizeDep(ref) {
 
   if (process.env.task === 'build') {
     if (!ref.isMinified) {
-      ref.base = ref.name + '.min.' + ref.typeDest;
+      ref.extDest = '.min.' + ref.typeDest;
+      ref.baseDest = ref.name + ref.extDest;
       ref.dest = path.join(ref.dirDest, ref.base);
     }
 
-    const extDestMin = '.min' + ref.destExt;
-
     // Group attributes for minification/concatenation
-    const basePathStripped = stripIgnoredBasePath(ref.baseDir, config.templateIgnoredBasePaths);
-    const pagePrefix = ref.forWrapper ? '' : path.basename(ref.data, '.json') + '-';
-    const groupWebPathPrefix = ref.forWrapper ? '/' + basePathStripped : '';
+    const pagePrefix = ref.forWrapper ? '' : path.basename(ref.consumer, '.json') + '-';
+    const groupWebPathPrefix = ref.forWrapper ? '/' + ref.dirStripped : '';
 
-
-    ref.groupDestDir = path.join(config.destBase, basePathStripped);
-    ref.groupDestFilename = pagePrefix + ref.groupKey + ref.extDestMin;
+    ref.groupDestDir = path.join(config.destBase, ref.dirStripped);
+    ref.groupDestFilename = pagePrefix + ref.groupKey + ref.extDest;
     ref.groupDestPath = path.join(ref.groupDestDir, ref.groupDestFilename);
     ref.groupWebPath = path.join(groupWebPathPrefix, ref.groupDestFilename);
     ref.groupSourcemapPath = ref.groupWebPath + '.map';

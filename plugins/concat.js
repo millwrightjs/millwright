@@ -18,7 +18,7 @@ module.exports = function concat(assets) {
       dirDest: sample.groupDestDir,
       destFilename: sample.groupDestFilename,
       groupKey: sample.groupKey,
-      destType: sample.destType,
+      destType: sample.typeDest,
       destFilenameMin: sample.groupDestFilename,
       dest: sample.dest,
       webPath: sample.groupDestPath,

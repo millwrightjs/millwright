@@ -83,6 +83,7 @@ function normalize(paths) {
             const ref = path.parse(src);
             ref.src = src;
             ref.srcResolved = path.resolve(src);
+            ref.consumer = file.srcResolved;
             cache.push('deps', ref);
             return plugins.getWebPath(src, file, key);
           }).uniq().value();
