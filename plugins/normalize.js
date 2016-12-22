@@ -79,9 +79,12 @@ function normalize(paths) {
       if (file.role === 'data' && file.content.files) {
         file.content.files = _.mapValues(file.content.files, (group, key) => {
           return _(group).map(dep => {
-            const srcResolved = path.resolve(path.join(file.dir, dep));
-            cache.push('deps', {consumer: file.srcResolved, srcResolved});
-            return plugins.getWebPath(dep, file, key);
+            const src = path.join(file.dir, dep);
+            const ref = path.parse(src);
+            ref.src = src;
+            ref.srcResolved = path.resolve(src);
+            cache.push('deps', ref);
+            return plugins.getWebPath(src, file, key);
           }).uniq().value();
         });
       }

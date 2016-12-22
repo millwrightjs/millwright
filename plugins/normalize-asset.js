@@ -17,15 +17,16 @@ function normalizeAsset(ref) {
   if (ref.isMinified) {
     ref.name = path.basename(ref.name, '.min');
   }
-  if (!ref.isMinified) {
-    ref.baseDest = ref.name + '.min.' + ref.typeDest;
-  }
   ref.basePathStripped = stripIgnoredBasePath(ref.baseDir, config.templateIgnoredBasePaths);
 
   // set dest directory
   ref.srcStripped = stripIgnoredBasePath(ref.src, config.templateIgnoredBasePaths);
   ref.dest = path.join(config.destBase, ref.srcStripped);
   ref.dirDest = path.dirname(ref.dest);
+
+  if (process.env.task === 'build' && !ref.isMinified) {
+    ref.baseDest = ref.name + '.min.' + ref.typeDest;
+  }
 
   return ref;
 }

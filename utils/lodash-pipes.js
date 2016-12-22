@@ -9,6 +9,11 @@ _.mixin({
 });
 
 function pipe(coll, fn, cond, when) {
+  if (!fn) {
+    console.error('Pipe requires a function, received undefined instead.');
+    process.exit(1);
+  }
+
   if (arguments.length === 3) {
     _.isFunction(cond) ? when = true : (when = cond, cond = _.stubTrue);
   } else if (arguments.length === 2) {
