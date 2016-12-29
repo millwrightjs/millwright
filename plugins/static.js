@@ -8,6 +8,8 @@ const cache = require('../utils/cache');
 
 module.exports = static;
 
+mustache.tags = ['{[{', '}]}'];
+
 const partialFileNames = _.attemptSilent(fs.readdirSync, config.partialsDir);
 const partials = _.reduce(partialFileNames, (obj, partialFileName) => {
   const name = path.basename(partialFileName, '.mustache');
