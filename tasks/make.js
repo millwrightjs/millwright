@@ -18,7 +18,12 @@ function make() {
   cache.set('files', 'srcResolved', plugins.normalize(fs.walkSync(config.srcDir)));
 
   cache.get('deps').forEach(dep => {
-    cache.get('files')[dep.srcResolved].role = 'asset';
+    let asset = cache.get('files')[dep.srcResolved];
+    if (!asset) {
+      asset = plugins.normalize([dep.src])[0];
+      cache.set('files', 'srcResolved', asset);
+    }
+    asset.role = 'asset';
   });
 
   const copyPassiveAssets = _.filter(cache.get('files'), f => !f.role).map(asset => {
