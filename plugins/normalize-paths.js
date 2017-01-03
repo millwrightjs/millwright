@@ -52,11 +52,9 @@ function normalize(ref) {
     ref.destPathMin = path.join(ref.destDir, ref.destFilenameMin);
   }
 
-  // Sourcemap filename
-  ref.sourcemapPath = path.join(ref.srcDirStripped, ref.destFilename + '.map');
+  ref.webPath = '/' + path.join(ref.srcDirStripped, ref.destFilename);
+  ref.sourcemapPath = ref.webPath + '.map';
 
-  // Relative path for use in templates
-  ref.webPath = '/' + path.join(path.dirname(ref.srcPathStripped), ref.destFilename);
 
   ref.isCode = ref.destType === 'css' || ref.destType === 'js';
   ref.shouldMinify = !ref.isMinified && ref.isCode;
