@@ -85,7 +85,6 @@ function normalize(paths) {
             ref.srcResolved = path.resolve(src);
             ref.consumer = file.srcResolved;
             ref.groupKey = key;
-            ref.forWrapper = file.role === 'wrapper';
             cache.push('deps', ref);
             return plugins.getWebPath(src, file, key);
           }).uniq().value();

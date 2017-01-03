@@ -29,8 +29,9 @@ function normalizeDep(ref) {
   ref.sourcemapPath = path.join(ref.dirStripped, ref.baseDest + '.map');
 
   if (process.env.task === 'build') {
+    ref.extDest = '.min.' + ref.typeDest;
+
     if (!ref.isMinified) {
-      ref.extDest = '.min.' + ref.typeDest;
       ref.baseDest = ref.name + ref.extDest;
       ref.dest = path.join(ref.dirDest, ref.base);
     }
@@ -39,11 +40,11 @@ function normalizeDep(ref) {
     const consumerDir = path.dirname(path.relative(path.join(process.cwd(), config.srcDir), ref.consumer));
     const forWrapper = consumerName === 'wrapper';
 
-    ref.uniquePathPortion = _.trimStart(path.relative(consumerDir, ref.dirStripped), path.sep + '.');
-    ref.dirDest = forWrapper ? consumerDir : path.join(consumerDir, ref.uniquePathPortion);
+    const uniquePathPortion = _.trimStart(path.relative(consumerDir, ref.dirStripped), path.sep + '.');
+    ref.dirDest = consumerDir;
 
-    const pagePrefix = ref.forWrapper ? '' : consumerName + '-';
-    const webPathPrefix = ref.forWrapper ? '/' + ref.dirDest : '';
+    const pagePrefix = forWrapper ? '' : consumerName + '-';
+    const webPathPrefix = (forWrapper ? '/' : '') + ref.dirDest;
 
     ref.dirDest = path.join(config.destBase, ref.dirDest);
     ref.filenameDest = pagePrefix + ref.groupKey + ref.extDest;
