@@ -1,4 +1,5 @@
 const path = require('path');
+const _ = require('lodash');
 const config = require('../config');
 const {getCompiledType, getType, stripIgnoredBasePath} = require('../utils/util');
 
@@ -34,15 +35,21 @@ function normalizeDep(ref) {
       ref.dest = path.join(ref.dirDest, ref.base);
     }
 
-    // Group attributes for minification/concatenation
-    const pagePrefix = ref.forWrapper ? '' : path.basename(ref.consumer, '.json') + '-';
-    const groupWebPathPrefix = ref.forWrapper ? '/' + ref.dirStripped : '';
+    const consumerName = path.basename(ref.consumer, '.json');
+    const consumerDir = path.dirname(path.relative(path.join(process.cwd(), config.srcDir), ref.consumer));
+    const forWrapper = consumerName === 'wrapper';
 
-    ref.groupDestDir = path.join(config.destBase, ref.dirStripped);
-    ref.groupDestFilename = pagePrefix + ref.groupKey + ref.extDest;
-    ref.groupDestPath = path.join(ref.groupDestDir, ref.groupDestFilename);
-    ref.groupWebPath = path.join(groupWebPathPrefix, ref.groupDestFilename);
-    ref.groupSourcemapPath = ref.groupWebPath + '.map';
+    ref.uniquePathPortion = _.trimStart(path.relative(consumerDir, ref.dirStripped), path.sep + '.');
+    ref.dirDest = forWrapper ? consumerDir : path.join(consumerDir, ref.uniquePathPortion);
+
+    const pagePrefix = ref.forWrapper ? '' : consumerName + '-';
+    const webPathPrefix = ref.forWrapper ? '/' + ref.dirDest : '';
+
+    ref.dirDest = path.join(config.destBase, ref.dirDest);
+    ref.filenameDest = pagePrefix + ref.groupKey + ref.extDest;
+    ref.dest = path.join(ref.dirDest, ref.filenameDest);
+    ref.webPath = path.join(webPathPrefix, ref.filenameDest);
+    ref.sourcemapPath = ref.webPath + '.map';
   }
 
   return ref;

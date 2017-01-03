@@ -26,10 +26,6 @@ function make() {
     asset.role = 'asset';
   });
 
-  const copyPassiveAssets = _.filter(cache.get('files'), f => !f.role).map(asset => {
-    const dest = path.join(config.destBase, asset.srcStripped);
-    return fs.copy(asset.src, dest);
-  });
 
   // We should remove passive assets from the file cache by this point
 
@@ -37,15 +33,23 @@ function make() {
 
   const transformAssets = runTransformAssets(_.filter(cache.get('files'), {role: 'asset'}));
 
-  const generateDeps = Promise.all(transformAssets).then(() => {
-    return Promise.all(_.castArray(runGenerateDeps(cache.get('deps'))));
-  });
+  return Promise.all(transformAssets)
+    .then(() => {
+      return Promise.all(_.castArray(runGenerateDeps(cache.get('deps'))));
+    })
+    .then(() => {
+      return Promise.all(_.filter(cache.get('files'), f => !f.role).map(asset => {
+        const dest = path.join(config.destBase, asset.srcStripped);
+        return fs.copy(asset.src, dest);
+      }));
+    });
 
   function runTransformAssets(assets) {
     return _(assets)
       .pipe(plugins.normalizeAsset)
       .pipe(plugins.read)
       .pipe(plugins.transpile, a => !a.isMinified)
+      .pipeTap(plugins.cacheImport, a => !a.isMinified)
       .pipe(plugins.copySource)
       .pipe(plugins.minify, a => !a.isMinified, task === 'build')
       .pipe(plugins.remapSources(task), a => a.map)
@@ -64,7 +68,5 @@ function make() {
       .pipe(plugins.output)
       .value();
   }
-
-  return Promise.all(_.flatten([generateDeps, copyPassiveAssets]));
 }
 

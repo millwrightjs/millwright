@@ -84,6 +84,8 @@ function normalize(paths) {
             ref.src = src;
             ref.srcResolved = path.resolve(src);
             ref.consumer = file.srcResolved;
+            ref.groupKey = key;
+            ref.forWrapper = file.role === 'wrapper';
             cache.push('deps', ref);
             return plugins.getWebPath(src, file, key);
           }).uniq().value();
@@ -92,37 +94,6 @@ function normalize(paths) {
       return file;
     })
     .value();
-    /*
-            .map((dep, index, deps) => {
-
-              const result = plugins.getWebPath({
-                role: 'asset',
-                path: path.normalize(path.join(file.dir, dep)),
-                data: file.srcResolved,
-                forWrapper: file.name === 'wrapper',
-                baseDir: file.dir,
-                groupKey: key
-              });
-              cache.push('deps', {srcResolved: result.srcResolved, consumer: file.srcResolved});
-
-              // TODO: stop running all of normalize-paths just to get the webPath, we should be
-              // using a purpose built normalization function for this
-
-              return result[task === 'build' ? 'groupWebPath' : 'webPath'];
-            }).uniq().value();
-        });
-      }
-      return file;
-    })
-    .map(file => {
-      _.forEach(file.mapImports, imported => cache.push('imports', {
-        src: imported,
-        srcResolved: path.resolve(imported),
-        consumer: file.src
-      }));
-      return file;
-    })
-   */
 }
 
 function getWrapper(ref, files, srcRoot) {
