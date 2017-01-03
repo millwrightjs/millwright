@@ -27,7 +27,7 @@ module.exports = function concat(assets) {
 
     const c = new Concat(true, result.dest, '\n');
     _.forEach(group, asset => {
-      const mappedPath = util.stripIgnoredBasePath(asset.srcPath, config.templateIgnoredBasePaths);
+      const mappedPath = util.stripIgnoredBasePath(asset.src, config.templateIgnoredBasePaths);
       c.add(mappedPath, asset.content, asset.map);
     });
 
