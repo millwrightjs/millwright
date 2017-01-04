@@ -37,6 +37,7 @@ function normalize(paths) {
         } else {
           normalized.role = 'template';
           normalized.dest = path.join(config.destBase, changeExt(normalized.srcStripped, '.html'));
+          normalized.destResolved = path.resolve(normalized.dest);
         }
       }
 
@@ -57,23 +58,13 @@ function normalize(paths) {
       if (file.role === 'template') {
         const wrapper = getWrapper(file.srcResolved, files, srcDirResolved);
         if (wrapper) {
-          file.wrapper = wrapper.src;
+          file.wrapper = wrapper.srcResolved;
           file.wrapperData = wrapper.data;
-          cache.push('deps', {
-            src: wrapper.src,
-            srcResolved: wrapper.srcResolved,
-            consumer: file.srcResolved
-          });
         }
         const data = _.find(files, {src: changeExt(file.src, '.json')});
         if (data) {
           data.role = 'data';
           file.data = data.srcResolved;
-          cache.push('deps', {
-            src: data.src,
-            srcResolved: data.srcResolved,
-            consumer: file.srcResolved
-          });
         }
       }
 

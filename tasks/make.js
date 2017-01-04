@@ -13,9 +13,11 @@ module.exports = make;
 function make(opts) {
   const task = process.env.task || 'make';
 
-  if (process.env.watch) {
+  if (opts && opts.targeted && opts.assets) {
     return run(opts.assets);
   }
+
+  cache.clear();
 
   clean();
 
@@ -65,7 +67,7 @@ function make(opts) {
 
   function runTransformAssets(assets) {
     return _(assets)
-      .pipe(plugins.normalizeAsset, !process.env.watch)
+      .pipe(plugins.normalizeAsset, !_.get(opts, 'targeted'))
       .pipe(plugins.read)
       .pipe(plugins.transpile, a => !a.isMinified)
       .pipeTap(plugins.cacheImport, a => !a.isMinified)

@@ -1,9 +1,9 @@
 const path = require('path');
 const fs = require('fs-extra');
 const _ = require('lodash');
-const cache = {};
+let cache = {};
 
-module.exports = {get, set, push};
+module.exports = {get, set, push, clear};
 
 function get(key, valueKey) {
   return valueKey ? cache[key][valueKey] : cache[key];
@@ -16,4 +16,8 @@ function set(key, valueKey, values) {
 
 function push(key, values) {
   cache[key] = (cache[key] || []).concat(_.castArray(values));
+}
+
+function clear() {
+  cache = {};
 }

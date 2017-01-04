@@ -5,16 +5,13 @@ const bs = require('browser-sync').create();
 const config = require('../config');
 const cache = require ('../utils/cache');
 const make = require('./make');
+const requireDir = require('require-dir');
+const plugins = _.mapValues(requireDir('../plugins', {camelcase: true}), _.curry);
 
 module.exports = serve;
 
 function serve() {
   if (process.env.task !== 'build') {
-    process.env.watch = true;
-
-    const chokidarOpts = {
-      ignored: path.join(process.cwd(), config.destBase, '**')
-    };
 
     const paths = _(cache.get('files'))
       .keys()
@@ -23,7 +20,7 @@ function serve() {
       .value();
 
     chokidar.watch(paths).on('change', (changedPath) => {
-      const role = _.get(cache.get('files', changedPath), 'role');
+
       /*
        * asset, template, import, wrapper, data, partial
        *
@@ -37,29 +34,59 @@ function serve() {
        * For partials, rerun static for all pages
        */
 
-      if (role === 'asset') {
-        const file = cache.get('files', changedPath);
-        make({assets: [file]}).then(() => {
-          bs.reload(file.destResolved);
-        });
-      }
+      const file = cache.get('files', changedPath);
+      const consumers = [];
+      const assets = [];
+      const reloadTargets = [];
+      var shouldMake = false;
+      var shouldMakeAll = false;
 
-      if (['import', 'partial', 'wrapper', 'data'].includes(role)) {
-        const consumers = _(cache.get('deps'))
+      if (['asset', 'import', 'wrapper'].includes(file.role)) {
+        const deps = _(cache.get('deps'))
           .filter({srcResolved: changedPath})
-          .map('consumer')
+          .map(dep => cache.get('files', dep.consumer))
           .uniq()
           .value();
-        console.log(consumers);
+
+        consumers.push(...deps);
       }
 
-      /*
-      const targets = importConsumers || cache.get('files', changedPath);
+      if (file.role === 'asset') {
+        assets.push(file);
+        const assetConsumers = _.filter(consumers, {role: 'asset'});
+        assets.push(...assetConsumers);
+        reloadTargets.push(file.destResolved);
+        reloadTargets.push(..._.map(assetConsumers, 'destResolved'));
+        shouldMake = true;
+      }
 
-      make({assets: targets}).then(() => {
-        bs.reload(changedPath);
-      });
-     */
+      if (file.role === 'import') {
+        const assetConsumers = _.filter(consumers, {role: 'asset'});
+        assets.push(...assetConsumers);
+        reloadTargets.push(..._.map(assetConsumers, 'destResolved'));
+        shouldMake = true;
+      }
+
+      if (file.role === 'data') {
+        shouldMakeAll = true;
+      }
+
+      if (file.role === 'template') {
+        plugins.static(file);
+      }
+
+      if (file.role === 'wrapper') {
+        const templates = _.filter(consumers, {role: 'template'});
+        templates.forEach(plugins.static);
+      }
+
+      if (shouldMakeAll) {
+        make().then(() => bs.reload());
+      } else if (shouldMake) {
+        make({assets, targeted: true}).then(() => bs.reload(reloadTargets));
+      } else {
+        bs.reload();
+      }
     });
   }
 

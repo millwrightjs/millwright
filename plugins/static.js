@@ -23,8 +23,10 @@ function static(file) {
   const wrapper = _.has(file, 'wrapper') ? fs.readFileSync(file.wrapper, 'utf8') : '';
   const page = fs.readFileSync(src, 'utf8');
 
-  const data = _.get(cache.get('files', dataPath), 'content');
-  const wrapperData = _.get(cache.get('files', wrapperDataPath), 'content');
+  const dataRef = cache.get('files', dataPath);
+  const data = _.get(dataRef, 'content');
+  const wrapperDataRef = cache.get('files', wrapperDataPath);
+  const wrapperData = _.get(wrapperDataRef, 'content');
   const templateData = _.assign({}, wrapperData, data);
 
   if (_.has(wrapperData, 'files') && _.has(data, 'files')) {
@@ -37,4 +39,30 @@ function static(file) {
   const result = mustache.render(wrapper || page, templateData, pagePartials);
 
   fs.outputFileSync(file.dest, result);
+
+  if (data) {
+    cache.push('deps', {
+      src: dataRef.src,
+      srcResolved: dataRef.srcResolved,
+      consumer: file.srcResolved
+    });
+  }
+
+  if (wrapperData) {
+    cache.push('deps', {
+      src: wrapperDataRef.src,
+      srcResolved: wrapperDataRef.srcResolved,
+      consumer: file.srcResolved
+    });
+  }
+
+  if (wrapper) {
+    const wrapperRef = cache.get('files', file.wrapper);
+    cache.push('deps', {
+      src: wrapperRef.src,
+      srcResolved: wrapperRef.srcResolved,
+      consumer: file.srcResolved
+    });
+  }
+
 }
