@@ -10,14 +10,18 @@ const config = require('../config');
 
 module.exports = make;
 
-function make() {
+function make(opts) {
   const task = process.env.task || 'make';
+
+  if (process.env.watch) {
+    return run(opts.assets);
+  }
 
   clean();
 
   cache.set('files', 'srcResolved', plugins.normalize(fs.walkSync(config.srcDir)));
 
-  cache.get('deps').forEach(dep => {
+  cache.get('deps').filter(dep => dep.role === 'asset').forEach(dep => {
     let asset = cache.get('files')[dep.srcResolved];
     if (!asset) {
       asset = plugins.normalize([dep.src])[0];
@@ -31,22 +35,37 @@ function make() {
 
   _(cache.get('files')).filter({role: 'template'}).forEach(plugins.static);
 
-  const transformAssets = runTransformAssets(_.filter(cache.get('files'), {role: 'asset'}));
 
-  return Promise.all(transformAssets)
-    .then(() => {
-      return Promise.all(_.castArray(runGenerateDeps(cache.get('deps'))));
-    })
-    .then(() => {
-      return Promise.all(_.filter(cache.get('files'), f => !f.role).map(asset => {
-        const dest = path.join(config.destBase, asset.srcStripped);
-        return fs.copy(asset.src, dest);
-      }));
-    });
+  return run();
+
+  function run(assets) {
+    const transformAssets = runTransformAssets(assets || _.filter(cache.get('files'), {role: 'asset'}));
+
+    return Promise.all(transformAssets)
+      .then(() => {
+        let deps = cache.get('deps').filter(dep => dep.role === 'asset');
+        if (assets) {
+          const assetSources = _.map(assets, 'srcResolved');
+          deps = deps.reduce((acc, dep) => {
+            if (assetSources.includes(dep.srcResolved)) {
+              acc.push(dep);
+            }
+            return acc;
+          }, []);
+        }
+        return Promise.all(_.castArray(runGenerateDeps(deps)));
+      })
+      .then(() => {
+        return Promise.all(_.filter(assets || cache.get('files'), f => !f.role).map(asset => {
+          const dest = path.join(config.destBase, asset.srcStripped);
+          return fs.copy(asset.src, dest);
+        }));
+      });
+  }
 
   function runTransformAssets(assets) {
     return _(assets)
-      .pipe(plugins.normalizeAsset)
+      .pipe(plugins.normalizeAsset, !process.env.watch)
       .pipe(plugins.read)
       .pipe(plugins.transpile, a => !a.isMinified)
       .pipeTap(plugins.cacheImport, a => !a.isMinified)

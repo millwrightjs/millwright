@@ -10,7 +10,7 @@ function cacheImport(files) {
     _.forEach(file.mapImports, source => {
       const resolved = path.resolve(source);
       if (pathExists(resolved)) {
-        cache.push('imports', {
+        cache.push('deps', {
           src: source,
           srcResolved: resolved,
           consumer: file.srcResolved

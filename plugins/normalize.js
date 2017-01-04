@@ -59,11 +59,21 @@ function normalize(paths) {
         if (wrapper) {
           file.wrapper = wrapper.src;
           file.wrapperData = wrapper.data;
+          cache.push('deps', {
+            src: wrapper.src,
+            srcResolved: wrapper.srcResolved,
+            consumer: file.srcResolved
+          });
         }
         const data = _.find(files, {src: changeExt(file.src, '.json')});
         if (data) {
           data.role = 'data';
           file.data = data.srcResolved;
+          cache.push('deps', {
+            src: data.src,
+            srcResolved: data.srcResolved,
+            consumer: file.srcResolved
+          });
         }
       }
 
@@ -85,6 +95,7 @@ function normalize(paths) {
             ref.srcResolved = path.resolve(src);
             ref.consumer = file.srcResolved;
             ref.groupKey = key;
+            ref.role = 'asset';
             cache.push('deps', ref);
             return plugins.getWebPath(src, file, key);
           }).uniq().value();
