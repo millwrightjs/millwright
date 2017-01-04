@@ -13,26 +13,23 @@ module.exports = serve;
 function serve() {
   if (process.env.task !== 'build') {
 
-    const paths = _(cache.get('files'))
+    const srcDirResolved = path.resolve(config.srcDir);
+
+    const aboveSrcPaths = _(cache.get('files'))
       .keys()
       .concat(_.map(cache.get('deps'), 'srcResolved'))
+      .filter(srcResolved => !srcResolved.startsWith(srcDirResolved))
       .uniq()
       .value();
 
-    chokidar.watch(paths).on('change', (changedPath) => {
+    const watchOpts = {
+      ignoreInitial: true
+    };
 
-      /*
-       * asset, template, import, wrapper, data, partial
-       *
-       * existing deps:
-       * import -> asset
-       *
-       * establish the following deps:
-       * wrapper -> template
-       * data -> template
-       *
-       * For partials, rerun static for all pages
-       */
+    chokidar.watch([srcDirResolved, ...aboveSrcPaths], watchOpts).on('all', (event, changedPath) => {
+      if (event !== 'change') {
+        return make().then(() => bs.reload());
+      }
 
       const file = cache.get('files', changedPath);
       const consumers = [];
