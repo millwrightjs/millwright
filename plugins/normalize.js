@@ -2,11 +2,12 @@ const path = require('path');
 const _ = require('lodash');
 const promisify = require('promisify-node');
 const fs = promisify(require('fs-extra'));
+const pathExists = require('path-exists').sync;
 const config = require('../config');
 const requireDir = require('require-dir');
 const plugins = _.mapValues(requireDir('../plugins', {camelcase: true}), _.curry);
 const cache = require('../utils/cache');
-const {getType, stripIgnoredBasePath, changeExt} = require('../utils/util');
+const {getType, stripIgnoredBasePath, changeExt, getCompiledType} = require('../utils/util');
 
 module.exports = normalize;
 
@@ -84,8 +85,19 @@ function normalize(paths) {
             if (depIsUrl) {
               return dep;
             }
-            const src = path.join(file.dir, dep);
-            const ref = path.parse(src);
+            let src = path.join(file.dir, dep);
+            let ref = path.parse(src);
+
+            // Swap in minified src when appropriate (and if exists)
+            const compiledType = getCompiledType(getType(ref.ext));
+            if (process.env.task === 'build' && !ref.name.endsWith('.min') && !compiledType) {
+              const srcMin = path.join(ref.dir, ref.name + '.min' + ref.ext);
+              if (pathExists(srcMin)) {
+                src = srcMin;
+                ref = path.parse(srcMin);
+              }
+            }
+
             ref.src = src;
             ref.srcResolved = path.resolve(src);
             ref.consumer = file.srcResolved;
