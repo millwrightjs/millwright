@@ -14,24 +14,23 @@ function getWebPath(refPath, dataFile, groupKey) {
     ref.base = ref.name + ref.ext;
   }
 
+  const forWrapper = dataFile.name === 'wrapper';
+  const basePathStripped = stripIgnoredBasePath(dataFile.dir, config.templateIgnoredBasePaths);
+  const prefix = forWrapper ? '' : dataFile.name + '-';
+  const pathBase = forWrapper ? '/' + basePathStripped : '';
+
   if (process.env.task === 'build') {
-    const forWrapper = dataFile.name === 'wrapper';
-    const basePathStripped = stripIgnoredBasePath(dataFile.dir, config.templateIgnoredBasePaths);
-    const prefix = forWrapper ? '' : dataFile.name + '-';
-    const pathBase = forWrapper ? '/' + basePathStripped : '';
-
-    ref.ext = '.min' + ref.ext;
-    ref.base = prefix + groupKey + ref.ext;
-
+    ref.base = prefix + groupKey + '.min' + ref.ext;
     return path.join(pathBase, ref.base);
   } else {
     const srcStripped = stripIgnoredBasePath(refPath, config.templateIgnoredBasePaths);
-    ref.isMinified = path.extname(ref.name) === '.min';
 
-    if (ref.isMinified) {
-      ref.name = path.basename(ref.name, '.min');
-    }
+    ref.dest = path.join(path.dirname(srcStripped), ref.base);
 
-    return '/' + path.join(path.dirname(srcStripped), ref.base);
+    // Fix dest for assets that are above the src directory, such as node modules
+    const consumerDir = path.dirname(path.relative(path.join(process.cwd(), config.srcDir), dataFile.srcResolved));
+    const aboveSrc = !ref.dest.startsWith(consumerDir);
+
+    return (aboveSrc ? '' : '/') + ref.dest;
   }
 }

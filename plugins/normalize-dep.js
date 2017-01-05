@@ -23,7 +23,17 @@ function normalizeDep(ref) {
     ref.name = path.basename(ref.name, '.min');
   }
 
+  const consumerName = path.basename(ref.consumer, '.json');
+  const consumerDir = path.dirname(path.relative(path.join(process.cwd(), config.srcDir), ref.consumer));
+  const forWrapper = consumerName === 'wrapper';
+
   ref.dest = path.join(config.destBase, ref.dirStripped, ref.baseDest);
+
+  // Fix dest for assets that are above the src directory, such as node modules
+  if (!ref.dest.startsWith(consumerDir, config.destBase.length + 1)) {
+    ref.dest = path.join(config.destBase, consumerDir, ref.dirStripped, ref.baseDest);
+  }
+
   ref.dirDest = path.dirname(ref.dest);
 
   ref.sourcemapPath = path.join(ref.dirStripped, ref.baseDest + '.map');
@@ -36,11 +46,6 @@ function normalizeDep(ref) {
       ref.dest = path.join(ref.dirDest, ref.base);
     }
 
-    const consumerName = path.basename(ref.consumer, '.json');
-    const consumerDir = path.dirname(path.relative(path.join(process.cwd(), config.srcDir), ref.consumer));
-    const forWrapper = consumerName === 'wrapper';
-
-    const uniquePathPortion = _.trimStart(path.relative(consumerDir, ref.dirStripped), path.sep + '.');
     ref.dirDest = consumerDir;
 
     const pagePrefix = forWrapper ? '' : consumerName + '-';
