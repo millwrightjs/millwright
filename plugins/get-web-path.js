@@ -20,19 +20,18 @@ function getWebPath(refPath, dataFile, groupKey) {
   const prefix = forWrapper ? '' : dataFile.name + '-';
   const pathBase = forWrapper ? '/' + basePathStripped : '';
 
+  // Fix dest for assets that are above the src directory, such as node modules
+  const consumerDir = path.dirname(path.relative(path.join(process.cwd(), config.srcDir), dataFile.srcResolved));
+
   if (process.env.task === 'build') {
     ref.base = prefix + groupKey + '.min' + ref.ext;
-    return path.join(pathBase, ref.base);
+    return '/' + path.join(consumerDir, ref.base);
   } else {
     const srcStripped = stripIgnoredBasePath(refPath, config.templateIgnoredBasePaths);
     const dirStripped = path.dirname(srcStripped);
+    const uniquePathPortion = _.trimStart(path.relative(consumerDir, dirStripped), path.sep + '.');
 
     ref.dest = path.join(path.dirname(srcStripped), ref.base);
-
-    // Fix dest for assets that are above the src directory, such as node modules
-    const consumerDir = path.dirname(path.relative(path.join(process.cwd(), config.srcDir), dataFile.srcResolved));
-
-    const uniquePathPortion = _.trimStart(path.relative(consumerDir, dirStripped), path.sep + '.');
 
     if (!dirStripped.startsWith(consumerDir)) {
       ref.dest = path.join(consumerDir, ref.dest);

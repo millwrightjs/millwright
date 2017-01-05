@@ -18,7 +18,7 @@ function normalizeDep(ref) {
     ref.extDest = '.' + ref.typeDest;
     ref.baseDest = ref.name + ref.extDest;
   }
-  ref.isMinified = path.extname(ref.name) === '.min';
+  ref.isMinified = ref.isMinified || path.extname(ref.name) === '.min';
   if (ref.isMinified) {
     ref.name = path.basename(ref.name, '.min');
   }
