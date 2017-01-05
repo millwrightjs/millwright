@@ -80,6 +80,10 @@ function normalize(paths) {
       if (file.role === 'data' && file.content.files) {
         file.content.files = _.mapValues(file.content.files, (group, key) => {
           return _(group).map(dep => {
+            const depIsUrl = ['http://', 'https://', '//'].find(str => dep.startsWith(str));
+            if (depIsUrl) {
+              return dep;
+            }
             const src = path.join(file.dir, dep);
             const ref = path.parse(src);
             ref.src = src;
