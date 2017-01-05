@@ -90,11 +90,16 @@ function normalize(paths) {
 
             // Swap in minified src when appropriate (and if exists)
             const compiledType = getCompiledType(getType(ref.ext));
-            if (process.env.task === 'build' && !ref.name.endsWith('.min') && !compiledType) {
-              const srcMin = path.join(ref.dir, ref.name + '.min' + ref.ext);
-              if (pathExists(srcMin)) {
+            if (!ref.name.endsWith('.min') && !compiledType) {
+              const srcMin = ['.min', '-min'].find(suffix => {
+                return pathExists(path.join(ref.dir, ref.name + suffix + ref.ext));
+              });
+              if (srcMin) {
+                ref.hasMinified = true;
+              }
+              if (srcMin && process.env.task === 'build') {
                 src = srcMin;
-                ref = path.parse(srcMin);
+                ref = path.parse(src);
               }
             }
 

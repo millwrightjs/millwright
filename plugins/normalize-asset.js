@@ -13,7 +13,7 @@ function normalizeAsset(ref) {
     ref.typeDest = compiledType;
     ref.baseDest = ref.name + '.' + ref.typeDest;
   }
-  ref.isMinified = path.extname(ref.name) === '.min';
+  ref.isMinified = ref.isMinified || path.extname(ref.name) === '.min';
   if (ref.isMinified) {
     ref.name = path.basename(ref.name, '.min');
   }

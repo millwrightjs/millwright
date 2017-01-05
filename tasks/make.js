@@ -30,6 +30,7 @@ function make(opts) {
       cache.set('files', 'srcResolved', asset);
     }
     asset.role = 'asset';
+    asset.isMinified = asset.isMinified || dep.hasMinified;
   });
 
 

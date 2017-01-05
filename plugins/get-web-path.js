@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const path = require('path');
 const config = require('../config');
 const {getCompiledType, getType, stripIgnoredBasePath} = require('../utils/util');
@@ -24,13 +25,19 @@ function getWebPath(refPath, dataFile, groupKey) {
     return path.join(pathBase, ref.base);
   } else {
     const srcStripped = stripIgnoredBasePath(refPath, config.templateIgnoredBasePaths);
+    const dirStripped = path.dirname(srcStripped);
 
     ref.dest = path.join(path.dirname(srcStripped), ref.base);
 
     // Fix dest for assets that are above the src directory, such as node modules
     const consumerDir = path.dirname(path.relative(path.join(process.cwd(), config.srcDir), dataFile.srcResolved));
-    const aboveSrc = !ref.dest.startsWith(consumerDir);
 
-    return (aboveSrc ? '' : '/') + ref.dest;
+    const uniquePathPortion = _.trimStart(path.relative(consumerDir, dirStripped), path.sep + '.');
+
+    if (!dirStripped.startsWith(consumerDir)) {
+      ref.dest = path.join(consumerDir, ref.dest);
+    }
+
+    return '/' + ref.dest;
   }
 }
