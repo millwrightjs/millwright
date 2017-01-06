@@ -74,7 +74,7 @@ function make(opts) {
       .pipeTap(plugins.cacheImport, a => !a.isMinified)
       .pipe(plugins.copySource)
       .pipe(plugins.minify, a => !a.isMinified, task === 'build')
-      .pipe(plugins.remapSources(task), a => a.map)
+      .pipe(plugins.remapSources, a => a.map)
       .value();
   }
 

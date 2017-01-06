@@ -79,7 +79,7 @@ function make(opts) {
       return !a.isMinified;
     }).pipe(plugins.copySource).pipe(plugins.minify, function (a) {
       return !a.isMinified;
-    }, task === 'build').pipe(plugins.remapSources(task), function (a) {
+    }, task === 'build').pipe(plugins.remapSources, function (a) {
       return a.map;
     }).value();
   }
