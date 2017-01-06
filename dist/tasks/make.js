@@ -85,13 +85,6 @@ function make(opts) {
   }
 
   function runGenerateDeps(deps) {
-    return _(deps).pipe(plugins.normalizeDep).pipe(function (dep) {
-      var _cache$get = cache.get('files', dep.srcResolved),
-          content = _cache$get.content,
-          map = _cache$get.map,
-          mapImports = _cache$get.mapImports;
-
-      return _.assign({}, dep, { content: content, map: map, mapImports: mapImports });
-    }).pipeAll(plugins.concat, task === 'build').pipe(plugins.outputSourcemaps).pipe(plugins.output).value();
+    return _(deps).pipe(plugins.normalizeDep).pipe(plugins.getAssetContent).pipeAll(plugins.concat, task === 'build').pipe(plugins.outputSourcemaps).pipe(plugins.output).value();
   }
 }

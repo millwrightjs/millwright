@@ -81,10 +81,7 @@ function make(opts) {
   function runGenerateDeps(deps) {
     return _(deps)
       .pipe(plugins.normalizeDep)
-      .pipe(dep => {
-        const {content, map, mapImports} = cache.get('files', dep.srcResolved);
-        return _.assign({}, dep, {content, map, mapImports});
-      })
+      .pipe(plugins.getAssetContent)
       .pipeAll(plugins.concat, task === 'build')
       .pipe(plugins.outputSourcemaps)
       .pipe(plugins.output)
