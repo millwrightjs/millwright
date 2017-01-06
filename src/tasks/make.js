@@ -23,16 +23,17 @@ function make(opts) {
 
   cache.set('files', 'srcResolved', plugins.normalize(fs.walkSync(config.srcDir)));
 
-  cache.get('deps').filter(dep => dep.role === 'asset').forEach(dep => {
-    let asset = cache.get('files')[dep.srcResolved];
-    if (!asset) {
-      asset = plugins.normalize([dep.src])[0];
-      cache.set('files', 'srcResolved', asset);
-    }
-    asset.role = 'asset';
-    asset.isMinified = asset.isMinified || dep.isMinified;
-  });
-
+  _(cache.get('deps'))
+    .filter({role: 'asset'})
+    .forEach(dep => {
+      let asset = cache.get('files')[dep.srcResolved];
+      if (!asset) {
+        asset = plugins.normalize([dep.src])[0];
+        cache.set('files', 'srcResolved', asset);
+      }
+      asset.role = 'asset';
+      asset.isMinified = asset.isMinified || dep.isMinified;
+    });
 
   // We should remove passive assets from the file cache by this point
 
@@ -46,7 +47,7 @@ function make(opts) {
 
     return Promise.all(transformAssets)
       .then(() => {
-        let deps = cache.get('deps').filter(dep => dep.role === 'asset');
+        let deps = _.filter(cache.get('deps'), dep => dep.role === 'asset');
         if (assets) {
           const assetSources = _.map(assets, 'srcResolved');
           deps = deps.reduce((acc, dep) => {

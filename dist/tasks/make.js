@@ -25,9 +25,7 @@ function make(opts) {
 
   cache.set('files', 'srcResolved', plugins.normalize(fs.walkSync(config.srcDir)));
 
-  cache.get('deps').filter(function (dep) {
-    return dep.role === 'asset';
-  }).forEach(function (dep) {
+  _(cache.get('deps')).filter({ role: 'asset' }).forEach(function (dep) {
     var asset = cache.get('files')[dep.srcResolved];
     if (!asset) {
       asset = plugins.normalize([dep.src])[0];
@@ -47,7 +45,7 @@ function make(opts) {
     var transformAssets = runTransformAssets(assets || _.filter(cache.get('files'), { role: 'asset' }));
 
     return Promise.all(transformAssets).then(function () {
-      var deps = cache.get('deps').filter(function (dep) {
+      var deps = _.filter(cache.get('deps'), function (dep) {
         return dep.role === 'asset';
       });
       if (assets) {
