@@ -5,9 +5,9 @@
   "homepage": "https://millwrightjs.com",
   "repository": "millwrightjs/millwright",
   "author": "Shawn Erquhart (https://github.com/erquhart)",
-  "main": "index.js",
+  "main": "./dist/index.js",
   "files": [
-    "lib"
+    "dist"
   ],
   "dependencies": {
     "babel-core": "^6.18.2",
@@ -30,8 +30,14 @@
     "uglify-js": "^2.7.3",
     "yargs": "^6.4.0"
   },
+  "devDependencies": {
+    "babel-cli": "^6.18.0"
+  },
   "engines": {
     "node": ">= 4.0"
+  },
+  "scripts": {
+    "build": "babel src -d dist --presets es2015"
   },
   "license": "MIT"
 }

@@ -6,7 +6,7 @@ const mustache = require('mustache');
 const {changeExt} = require('../utils/util');
 const cache = require('../utils/cache');
 
-module.exports = static;
+module.exports = staticGen;
 
 mustache.tags = ['{[{', '}]}'];
 
@@ -18,7 +18,7 @@ const partials = _.reduce(partialFileNames, (obj, partialFileName) => {
   return obj;
 }, {});
 
-function static(file) {
+function staticGen(file) {
   const {src, data: dataPath, wrapperData: wrapperDataPath} = file;
   const wrapper = _.has(file, 'wrapper') ? fs.readFileSync(file.wrapper, 'utf8') : '';
   const page = fs.readFileSync(src, 'utf8');

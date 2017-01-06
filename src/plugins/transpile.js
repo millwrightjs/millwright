@@ -78,7 +78,7 @@ function coffee(file) {
 }
 
 function js(file) {
-  const presets = arr => arr.map(name => path.join(__dirname, '../node_modules/babel-preset-' + name));
+  const presets = arr => arr.map(name => path.join(__dirname, '../../node_modules/babel-preset-' + name));
   const opts = {
     filename: file.base,
     presets: presets(['es2015']),
