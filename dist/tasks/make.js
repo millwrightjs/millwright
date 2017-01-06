@@ -6,7 +6,7 @@ var promisify = require('promisify-node');
 var fs = promisify(require('fs-extra'));
 var clean = require('./clean');
 var requireDir = require('require-dir');
-var plugins = _.mapValues(requireDir('../plugins', { camelcase: true }), _.curry);
+var plugins = requireDir('../plugins', { camelcase: true });
 var cache = require('../utils/cache');
 var config = require('../config');
 

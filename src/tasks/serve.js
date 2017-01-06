@@ -6,7 +6,7 @@ const config = require('../config');
 const cache = require ('../utils/cache');
 const make = require('./make');
 const requireDir = require('require-dir');
-const plugins = _.mapValues(requireDir('../plugins', {camelcase: true}), _.curry);
+const plugins = requireDir('../plugins', {camelcase: true});
 
 module.exports = serve;
 

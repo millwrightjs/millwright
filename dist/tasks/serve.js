@@ -10,7 +10,7 @@ var config = require('../config');
 var cache = require('../utils/cache');
 var make = require('./make');
 var requireDir = require('require-dir');
-var plugins = _.mapValues(requireDir('../plugins', { camelcase: true }), _.curry);
+var plugins = requireDir('../plugins', { camelcase: true });
 
 module.exports = serve;
 

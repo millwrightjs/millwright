@@ -5,7 +5,7 @@ const fs = promisify(require('fs-extra'));
 const pathExists = require('path-exists').sync;
 const config = require('../config');
 const requireDir = require('require-dir');
-const plugins = _.mapValues(requireDir('../plugins', {camelcase: true}), _.curry);
+const plugins = requireDir('../plugins', {camelcase: true});
 const cache = require('../utils/cache');
 const {getType, stripIgnoredBasePath, changeExt, getCompiledType} = require('../utils/util');
 
