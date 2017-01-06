@@ -1,6 +1,6 @@
 {
   "name": "millwright",
-  "description": "A ridiculously simple static site generator with CMS support.",
+  "description": "A zero configuration build tool for the web.",
   "version": "0.2.7",
   "homepage": "https://millwrightjs.com",
   "repository": "millwrightjs/millwright",
