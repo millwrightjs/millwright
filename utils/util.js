@@ -1,12 +1,9 @@
 const _ = require('lodash');
 const path = require('path');
-const pathExists = require('path-exists');
 
 module.exports = {
   getCompiledType,
-  getOrdinal,
   getType,
-  whicheverExists,
   stripIgnoredBasePath,
   changeExt
 };
@@ -22,15 +19,6 @@ function getCompiledType(type) {
   return _.findKey(typeMap, types => _.includes(types, type));
 }
 
-function getOrdinal(num) {
-  if((parseFloat(num) === parseInt(num)) && !isNaN(num)) {
-    var suffixes=["th","st","nd","rd"];
-    var remainder = num % 100;
-    return num + (suffixes[(remainder - 20) % 10] || suffixes[remainder] || suffixes[0]);
-  }
-  return num;
-}
-
 function getType(ext) {
   const typeMap = {
     js: 'js',
@@ -41,11 +29,6 @@ function getType(ext) {
     coffee: 'coffee'
   };
   return typeMap[_.trimStart(ext, '.')];
-}
-
-function whicheverExists(...paths) {
-  const result = _.find([...paths], pathName => pathExists.sync(pathName));
-  return result;
 }
 
 function stripIgnoredBasePath(_path, basePaths) {
