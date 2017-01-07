@@ -84,8 +84,8 @@ function normalize(paths) {
     }
     return file;
   }).map(function (file) {
-    if (file.role === 'data' && file.content.files) {
-      file.content.files = _.mapValues(file.content.files, function (group, key) {
+    if (file.role === 'data' && file.content.assets) {
+      file.content.assets = _.mapValues(file.content.assets, function (group, key) {
         return _(group).map(function (dep) {
           var depIsUrl = ['http://', 'https://', '//'].find(function (str) {
             return dep.startsWith(str);

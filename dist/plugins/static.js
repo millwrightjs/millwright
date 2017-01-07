@@ -37,8 +37,8 @@ function staticGen(file) {
   var wrapperData = _.get(wrapperDataRef, 'content');
   var templateData = _.assign({}, wrapperData, data);
 
-  if (_.has(wrapperData, 'files') && _.has(data, 'files')) {
-    templateData.files = _.mergeWith({}, wrapperData.files, data.files, function (dest, src) {
+  if (_.has(wrapperData, 'assets') && _.has(data, 'assets')) {
+    templateData.assets = _.mergeWith({}, wrapperData.assets, data.assets, function (dest, src) {
       return [dest, src].every(_.isArray) ? _.union(dest, src) : undefined;
     });
   }

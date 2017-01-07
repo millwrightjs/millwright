@@ -78,8 +78,8 @@ function normalize(paths) {
       return file;
     })
     .map(file => {
-      if (file.role === 'data' && file.content.files) {
-        file.content.files = _.mapValues(file.content.files, (group, key) => {
+      if (file.role === 'data' && file.content.assets) {
+        file.content.assets = _.mapValues(file.content.assets, (group, key) => {
           return _(group).map(dep => {
             const depIsUrl = ['http://', 'https://', '//'].find(str => dep.startsWith(str));
             if (depIsUrl) {
