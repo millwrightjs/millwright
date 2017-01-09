@@ -15,7 +15,7 @@ defaults.templateIgnoredBasePaths = ['src', 'bower_components', 'node_modules'];
 defaults.srcDir = 'src';
 defaults.wrapperPath = path.join(defaults.srcDir, 'wrapper.mustache');
 defaults.wrapperDataPath = path.join(defaults.srcDir, 'wrapper.json');
-defaults.partialsDir = path.join(defaults.srcDir, 'src/partials');
+defaults.partialsDir = path.join(defaults.srcDir, 'partials');
 
 defaults.serveMsg = 'Millwright serving at ' + defaults.servePath + '...';
 

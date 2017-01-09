@@ -1,5 +1,8 @@
 'use strict';
 
+// TODO: remove uncaught exception logging
+// This is in place temporarily to ensure we at least get a stack trace on failure while the project
+// is in alpha.
 process.on('uncaughtException', function (e) {
   console.log(e);process.exit(1);
 });
