@@ -77,6 +77,15 @@ function serve() {
         templates.forEach(plugins.static);
       }
 
+      if (['partial', 'lambda'].includes(file.role)) {
+        const opts = {
+          shouldGetPartials: file.role === 'partial',
+          shouldGetLambdas: file.role === 'lambda'
+        };
+        const templates = _.filter(cache.get('files'), {role: 'template'});
+        templates.forEach(template => plugins.static(template, opts));
+      }
+
       if (shouldMakeAll) {
         make().then(() => bs.reload());
       } else if (shouldMake) {

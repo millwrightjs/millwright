@@ -13,27 +13,15 @@ var cache = require('../utils/cache');
 
 module.exports = staticGen;
 
-mustache.tags = ['{[{', '}]}'];
+var partials = void 0,
+    lambdas = void 0;
 
-var partialFileNames = _.attemptSilent(fs.readdirSync, config.partialsDir);
-var partials = _.reduce(partialFileNames, function (obj, partialFileName) {
-  var name = path.basename(partialFileName, '.mustache');
-  var partialPath = path.join(config.partialsDir, partialFileName);
-  obj[name] = fs.readFileSync(partialPath).toString();
-  return obj;
-}, {});
-var lambdaFileNames = _.attemptSilent(fs.readdirSync, config.lambdasDir);
-var lambdas = _.reduce(lambdaFileNames, function (obj, lambdaFileName) {
-  var name = path.basename(lambdaFileName, '.js');
-  var modulePath = path.join(process.cwd(), config.lambdasDir, name);
-  var mod = require(modulePath).module;
-  obj[name] = function () {
-    return mod.require(modulePath).lambda;
-  };
-  return obj;
-}, {});
+function staticGen(file, opts) {
+  opts = _.isObject(opts) ? opts : {};
+  mustache.tags = config.templateTags;
+  partials = !partials || opts.shouldGetPartials ? getPartials() : partials;
+  lambdas = !lambdas || opts.shouldGetLambdas ? getLambdas() : lambdas;
 
-function staticGen(file) {
   var src = file.src,
       dataPath = file.data,
       wrapperDataPath = file.wrapperData;
@@ -82,4 +70,29 @@ function staticGen(file) {
       consumer: file.srcResolved
     });
   }
+}
+
+function getPartials() {
+  var partialFileNames = _.attemptSilent(fs.readdirSync, config.partialsDir);
+  return _.reduce(partialFileNames, function (obj, partialFileName) {
+    var name = path.basename(partialFileName, '.mustache');
+    var partialPath = path.join(config.partialsDir, partialFileName);
+    delete require.cache[require.resolve(modulePath)];
+    obj[name] = fs.readFileSync(partialPath).toString();
+    return obj;
+  }, {});
+}
+
+function getLambdas() {
+  var lambdaFileNames = _.attemptSilent(fs.readdirSync, config.lambdasDir);
+  return _.reduce(lambdaFileNames, function (obj, lambdaFileName) {
+    var name = path.basename(lambdaFileName, '.js');
+    var modulePath = path.join(process.cwd(), config.lambdasDir, name);
+    var mod = require(modulePath).module;
+    delete require.cache[require.resolve(modulePath)];
+    obj[name] = function () {
+      return mod.require(modulePath).lambda;
+    };
+    return obj;
+  }, {});
 }

@@ -14,6 +14,7 @@ defaults.servePort = 8080;
 defaults.servePath = 'http://localhost:' + defaults.servePort;
 defaults.defaultCommand = 'dev';
 defaults.templateIgnoredBasePaths = ['src', 'bower_components', 'node_modules'];
+defaults.templateTags = ['{[{', '}]}'];
 defaults.srcDir = 'src';
 defaults.wrapperPath = path.join(defaults.srcDir, 'wrapper.mustache');
 defaults.wrapperDataPath = path.join(defaults.srcDir, 'wrapper.json');

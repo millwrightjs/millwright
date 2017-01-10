@@ -79,6 +79,19 @@ function serve() {
           templates.forEach(plugins.static);
         }
 
+        if (['partial', 'lambda'].includes(file.role)) {
+          (function () {
+            var opts = {
+              shouldGetPartials: file.role === 'partial',
+              shouldGetLambdas: file.role === 'lambda'
+            };
+            var templates = _.filter(cache.get('files'), { role: 'template' });
+            templates.forEach(function (template) {
+              return plugins.static(template, opts);
+            });
+          })();
+        }
+
         if (shouldMakeAll) {
           make().then(function () {
             return bs.reload();

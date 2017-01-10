@@ -40,6 +40,8 @@ function normalize(paths) {
           normalized.dest = path.join(config.destBase, changeExt(normalized.srcStripped, '.html'));
           normalized.destResolved = path.resolve(normalized.dest);
         }
+      } else if (type === 'js' && parentDir === 'lambdas') {
+        normalized.role = 'lambda';
       }
 
       return normalized;
