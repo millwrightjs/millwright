@@ -17,6 +17,14 @@ const partials = _.reduce(partialFileNames, (obj, partialFileName) => {
   obj[name] = fs.readFileSync(partialPath).toString();
   return obj;
 }, {});
+const lambdaFileNames = _.attemptSilent(fs.readdirSync, config.lambdasDir);
+const lambdas = _.reduce(lambdaFileNames, (obj, lambdaFileName) => {
+  const name = path.basename(lambdaFileName, '.js');
+  const modulePath = path.join(process.cwd(), config.lambdasDir, name);
+  const mod = require(modulePath).module;
+  obj[name] = () => mod.require(modulePath).lambda;
+  return obj;
+}, {});
 
 function staticGen(file) {
   const {src, data: dataPath, wrapperData: wrapperDataPath} = file;
@@ -27,7 +35,7 @@ function staticGen(file) {
   const data = _.get(dataRef, 'content');
   const wrapperDataRef = cache.get('files', wrapperDataPath);
   const wrapperData = _.get(wrapperDataRef, 'content');
-  const templateData = _.assign({}, wrapperData, data);
+  const templateData = _.assign({}, wrapperData, data, {lambdas});
 
   if (_.has(wrapperData, 'assets') && _.has(data, 'assets')) {
     templateData.assets = _.mergeWith({}, wrapperData.assets, data.assets, (dest, src) => {

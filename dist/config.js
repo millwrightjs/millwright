@@ -18,6 +18,7 @@ defaults.srcDir = 'src';
 defaults.wrapperPath = path.join(defaults.srcDir, 'wrapper.mustache');
 defaults.wrapperDataPath = path.join(defaults.srcDir, 'wrapper.json');
 defaults.partialsDir = path.join(defaults.srcDir, 'partials');
+defaults.lambdasDir = path.join(defaults.srcDir, 'lambdas');
 
 defaults.serveMsg = 'Millwright serving at ' + defaults.servePath + '...';
 

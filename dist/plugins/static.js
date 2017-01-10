@@ -22,6 +22,16 @@ var partials = _.reduce(partialFileNames, function (obj, partialFileName) {
   obj[name] = fs.readFileSync(partialPath).toString();
   return obj;
 }, {});
+var lambdaFileNames = _.attemptSilent(fs.readdirSync, config.lambdasDir);
+var lambdas = _.reduce(lambdaFileNames, function (obj, lambdaFileName) {
+  var name = path.basename(lambdaFileName, '.js');
+  var modulePath = path.join(process.cwd(), config.lambdasDir, name);
+  var mod = require(modulePath).module;
+  obj[name] = function () {
+    return mod.require(modulePath).lambda;
+  };
+  return obj;
+}, {});
 
 function staticGen(file) {
   var src = file.src,
@@ -35,7 +45,7 @@ function staticGen(file) {
   var data = _.get(dataRef, 'content');
   var wrapperDataRef = cache.get('files', wrapperDataPath);
   var wrapperData = _.get(wrapperDataRef, 'content');
-  var templateData = _.assign({}, wrapperData, data);
+  var templateData = _.assign({}, wrapperData, data, { lambdas: lambdas });
 
   if (_.has(wrapperData, 'assets') && _.has(data, 'assets')) {
     templateData.assets = _.mergeWith({}, wrapperData.assets, data.assets, function (dest, src) {
