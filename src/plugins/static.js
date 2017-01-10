@@ -3,6 +3,7 @@ const fs = require('fs-extra');
 const path = require('path');
 const config = require('../config');
 const mustache = require('mustache');
+const decache = require('decache');
 const {changeExt} = require('../utils/util');
 const cache = require('../utils/cache');
 
@@ -14,7 +15,7 @@ function staticGen(file, opts) {
   opts = _.isObject(opts) ? opts : {};
   mustache.tags = config.templateTags;
   partials = (!partials || opts.shouldGetPartials) ? getPartials() : partials;
-  lambdas = (!lambdas || opts.shouldGetLambdas) ? getLambdas() : lambdas;
+  lambdas = (!lambdas || opts.shouldGetLambdas) ? getLambdas(opts.shouldGetLambdas) : lambdas;
 
   const {src, data: dataPath, wrapperData: wrapperDataPath} = file;
   const wrapper = _.has(file, 'wrapper') ? fs.readFileSync(file.wrapper, 'utf8') : '';
@@ -68,19 +69,22 @@ function getPartials() {
   return _.reduce(partialFileNames, (obj, partialFileName) => {
     const name = path.basename(partialFileName, '.mustache');
     const partialPath = path.join(config.partialsDir, partialFileName);
-    delete require.cache[require.resolve(modulePath)]
     obj[name] = fs.readFileSync(partialPath).toString();
     return obj;
   }, {});
 }
 
-function getLambdas() {
+function getLambdas(reload) {
   const lambdaFileNames = _.attemptSilent(fs.readdirSync, config.lambdasDir);
   return _.reduce(lambdaFileNames, (obj, lambdaFileName) => {
     const name = path.basename(lambdaFileName, '.js');
     const modulePath = path.join(process.cwd(), config.lambdasDir, name);
     const mod = require(modulePath).module;
-    delete require.cache[require.resolve(modulePath)]
+
+    if (reload) {
+      decache(modulePath);
+    }
+
     obj[name] = () => mod.require(modulePath).lambda;
     return obj;
   }, {});

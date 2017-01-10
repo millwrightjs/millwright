@@ -17,6 +17,7 @@
     "coffee-script": "^1.10.0",
     "concat-with-sourcemaps": "^1.0.4",
     "cssnano": "^3.7.5",
+    "decache": "^4.1.0",
     "fs-extra": "^1.0.0",
     "less": "^2.7.1",
     "mustache": "^2.2.1",
