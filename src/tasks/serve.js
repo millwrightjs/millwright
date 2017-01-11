@@ -55,35 +55,27 @@ function serve() {
         reloadTargets.push(file.destResolved);
         reloadTargets.push(..._.map(assetConsumers, 'destResolved'));
         shouldMake = true;
-      }
-
-      if (file.role === 'import') {
+      } else if (file.role === 'import') {
         const assetConsumers = _.filter(consumers, {role: 'asset'});
         assets.push(...assetConsumers);
         reloadTargets.push(..._.map(assetConsumers, 'destResolved'));
         shouldMake = true;
-      }
-
-      if (file.role === 'data') {
+      } else if (file.role === 'data') {
         shouldMakeAll = true;
-      }
-
-      if (file.role === 'template') {
+      } else if (file.role === 'template') {
         plugins.static(file);
-      }
-
-      if (file.role === 'wrapper') {
+      } else if (file.role === 'wrapper') {
         const templates = _.filter(consumers, {role: 'template'});
         templates.forEach(plugins.static);
-      }
-
-      if (['partial', 'lambda'].includes(file.role)) {
+      } else if (['partial', 'lambda'].includes(file.role)) {
         const opts = {
           shouldGetPartials: file.role === 'partial',
           shouldGetLambdas: file.role === 'lambda'
         };
         const templates = _.filter(cache.get('files'), {role: 'template'});
         templates.forEach(template => plugins.static(template, opts));
+      } else {
+        shouldMakeAll = true;
       }
 
       if (shouldMakeAll) {
@@ -101,6 +93,14 @@ function serve() {
       baseDir: config.serveRoot,
       serveStaticOptions: {
         extensions: ['html']
+      }
+    },
+    snippetOptions: {
+      rule: {
+        match: /$/,
+        fn: function (snippet) {
+          return snippet;
+        }
       }
     },
     notify: false,
