@@ -16,7 +16,7 @@ function getWebPath(refPath, dataFile, groupKey) {
   }
 
   const forWrapper = dataFile.name === 'wrapper';
-  const basePathStripped = stripIgnoredBasePath(dataFile.dir, config.templateIgnoredBasePaths);
+  const basePathStripped = stripIgnoredBasePath(dataFile.dir, config.assetIgnoredBasePaths);
   const prefix = forWrapper ? '' : dataFile.name + '-';
   const pathBase = forWrapper ? '/' + basePathStripped : '';
 
@@ -27,7 +27,7 @@ function getWebPath(refPath, dataFile, groupKey) {
     ref.base = prefix + groupKey + '.min' + ref.ext;
     return '/' + path.join(consumerDir, ref.base);
   } else {
-    const srcStripped = stripIgnoredBasePath(refPath, config.templateIgnoredBasePaths);
+    const srcStripped = stripIgnoredBasePath(refPath, config.assetIgnoredBasePaths);
     const dirStripped = path.dirname(srcStripped);
     const uniquePathPortion = _.trimStart(path.relative(consumerDir, dirStripped), path.sep + '.');
 

@@ -19,7 +19,7 @@ module.exports = function concat(assets) {
 
     var c = new Concat(true, result.dest, '\n');
     _.forEach(group, function (asset) {
-      var mappedPath = util.stripIgnoredBasePath(asset.src, config.templateIgnoredBasePaths);
+      var mappedPath = util.stripIgnoredBasePath(asset.src, config.assetIgnoredBasePaths);
       c.add(mappedPath, asset.content, asset.map);
     });
 

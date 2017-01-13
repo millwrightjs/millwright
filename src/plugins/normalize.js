@@ -28,7 +28,7 @@ function normalize(paths) {
       normalized.src = src;
       normalized.srcResolved = srcResolved;
       normalized.dirResolved = dirResolved;
-      normalized.srcStripped = stripIgnoredBasePath(src, config.templateIgnoredBasePaths);
+      normalized.srcStripped = stripIgnoredBasePath(src, config.assetIgnoredBasePaths);
 
       if (type === 'mustache') {
         if (parentDir === 'partials') {
@@ -37,7 +37,7 @@ function normalize(paths) {
           normalized.role = 'wrapper';
         } else {
           normalized.role = 'template';
-          normalized.dest = path.join(config.destBase, changeExt(normalized.srcStripped, '.html'));
+          normalized.dest = path.join(config.destDir, changeExt(normalized.srcStripped, '.html'));
           normalized.destResolved = path.resolve(normalized.dest);
         }
       } else if (type === 'js' && parentDir === 'lambdas') {

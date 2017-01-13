@@ -8,7 +8,7 @@ var config = require('../config');
 
 module.exports = function outputSourcemaps(file) {
   // Get paths
-  var mapPath = path.join(config.destBase, 'sourcemaps', file.sourcemapPath);
+  var mapPath = path.join(config.destDir, 'sourcemaps', file.sourcemapPath);
 
   // Append sourceMappingURL to file
   var mapUrl = path.relative(file.dirDest, mapPath);

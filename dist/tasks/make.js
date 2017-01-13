@@ -64,7 +64,7 @@ function make(opts) {
       return Promise.all(_.filter(assets || cache.get('files'), function (f) {
         return !f.role;
       }).map(function (asset) {
-        var dest = path.join(config.destBase, asset.srcStripped);
+        var dest = path.join(config.destDir, asset.srcStripped);
         return fs.copy(asset.src, dest);
       }));
     });

@@ -90,7 +90,7 @@ function serve() {
 
   const bsOpts = {
     server: {
-      baseDir: config.serveRoot,
+      baseDir: config.destDir,
       serveStaticOptions: {
         extensions: ['html']
       }

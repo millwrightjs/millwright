@@ -61,7 +61,7 @@ function make(opts) {
       })
       .then(() => {
         return Promise.all(_.filter(assets || cache.get('files'), f => !f.role).map(asset => {
-          const dest = path.join(config.destBase, asset.srcStripped);
+          const dest = path.join(config.destDir, asset.srcStripped);
           return fs.copy(asset.src, dest);
         }));
       });

@@ -22,7 +22,7 @@ function getWebPath(refPath, dataFile, groupKey) {
   }
 
   var forWrapper = dataFile.name === 'wrapper';
-  var basePathStripped = stripIgnoredBasePath(dataFile.dir, config.templateIgnoredBasePaths);
+  var basePathStripped = stripIgnoredBasePath(dataFile.dir, config.assetIgnoredBasePaths);
   var prefix = forWrapper ? '' : dataFile.name + '-';
   var pathBase = forWrapper ? '/' + basePathStripped : '';
 
@@ -33,7 +33,7 @@ function getWebPath(refPath, dataFile, groupKey) {
     ref.base = prefix + groupKey + '.min' + ref.ext;
     return '/' + path.join(consumerDir, ref.base);
   } else {
-    var srcStripped = stripIgnoredBasePath(refPath, config.templateIgnoredBasePaths);
+    var srcStripped = stripIgnoredBasePath(refPath, config.assetIgnoredBasePaths);
     var dirStripped = path.dirname(srcStripped);
     var uniquePathPortion = _.trimStart(path.relative(consumerDir, dirStripped), path.sep + '.');
 

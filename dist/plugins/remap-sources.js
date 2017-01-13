@@ -10,7 +10,7 @@ module.exports = remapSources;
 function remapSources(file) {
   var parsedMap = _.isString(file.map) ? JSON.parse(file.map) : file.map;
   parsedMap.sources = _.map(parsedMap.sources, function (source) {
-    var strippedPath = util.stripIgnoredBasePath(source, config.templateIgnoredBasePaths);
+    var strippedPath = util.stripIgnoredBasePath(source, config.assetIgnoredBasePaths);
     return path.join('/sourcemaps/', strippedPath);
   });
   var map = JSON.stringify(_.pick(parsedMap, 'version', 'mappings', 'names', 'sources'));

@@ -16,8 +16,8 @@ module.exports = function copySource(file) {
   return Promise.all(promises).then(() => file);
 
   function copyToSourcemaps(sourcePath) {
-    const strippedSourcePath = util.stripIgnoredBasePath(sourcePath, config.templateIgnoredBasePaths);
-    const sourcemapsPath = path.join(config.destBase, 'sourcemaps', strippedSourcePath);
+    const strippedSourcePath = util.stripIgnoredBasePath(sourcePath, config.assetIgnoredBasePaths);
+    const sourcemapsPath = path.join(config.destDir, 'sourcemaps', strippedSourcePath);
     return _.attemptSilent(fs.copy, sourcePath, sourcemapsPath, {dereference: true});
   }
 

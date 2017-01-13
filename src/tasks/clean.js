@@ -4,5 +4,5 @@ const config = require('../config');
 module.exports = clean;
 
 function clean() {
-  fs.removeSync(config.destBase);
+  fs.removeSync(config.destDir);
 }

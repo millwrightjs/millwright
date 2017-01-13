@@ -23,11 +23,11 @@ function normalizeAsset(ref) {
   if (ref.isMinified) {
     ref.name = path.basename(ref.name, '.min');
   }
-  ref.basePathStripped = stripIgnoredBasePath(ref.baseDir, config.templateIgnoredBasePaths);
+  ref.basePathStripped = stripIgnoredBasePath(ref.baseDir, config.assetIgnoredBasePaths);
 
   // set dest directory
-  ref.srcStripped = stripIgnoredBasePath(ref.src, config.templateIgnoredBasePaths);
-  ref.dirDest = path.join(config.destBase, path.dirname(ref.srcStripped));
+  ref.srcStripped = stripIgnoredBasePath(ref.src, config.assetIgnoredBasePaths);
+  ref.dirDest = path.join(config.destDir, path.dirname(ref.srcStripped));
 
   if (process.env.task === 'build' && !ref.isMinified) {
     ref.baseDest = ref.name + '.min.' + ref.typeDest;

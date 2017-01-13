@@ -22,8 +22,8 @@ module.exports = function copySource(file) {
   });
 
   function copyToSourcemaps(sourcePath) {
-    var strippedSourcePath = util.stripIgnoredBasePath(sourcePath, config.templateIgnoredBasePaths);
-    var sourcemapsPath = path.join(config.destBase, 'sourcemaps', strippedSourcePath);
+    var strippedSourcePath = util.stripIgnoredBasePath(sourcePath, config.assetIgnoredBasePaths);
+    var sourcemapsPath = path.join(config.destDir, 'sourcemaps', strippedSourcePath);
     return _.attemptSilent(fs.copy, sourcePath, sourcemapsPath, { dereference: true });
   }
 };

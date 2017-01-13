@@ -6,7 +6,7 @@ const {getCompiledType, getType, stripIgnoredBasePath} = require('../utils/util'
 module.exports = normalizeDep;
 
 function normalizeDep(ref) {
-  ref.srcStripped = stripIgnoredBasePath(ref.src, config.templateIgnoredBasePaths);
+  ref.srcStripped = stripIgnoredBasePath(ref.src, config.assetIgnoredBasePaths);
   ref.dirStripped = path.dirname(ref.srcStripped);
   ref.baseDest = ref.base;
   ref.extDest = ref.ext;
@@ -27,11 +27,11 @@ function normalizeDep(ref) {
   const consumerDir = path.dirname(path.relative(path.join(process.cwd(), config.srcDir), ref.consumer));
   const forWrapper = consumerName === 'wrapper';
 
-  ref.dest = path.join(config.destBase, ref.dirStripped, ref.baseDest);
+  ref.dest = path.join(config.destDir, ref.dirStripped, ref.baseDest);
 
   // Fix dest for assets that are above the src directory, such as node modules
-  if (!ref.dest.startsWith(consumerDir, config.destBase.length + 1)) {
-    ref.dest = path.join(config.destBase, consumerDir, ref.dirStripped, ref.baseDest);
+  if (!ref.dest.startsWith(consumerDir, config.destDir.length + 1)) {
+    ref.dest = path.join(config.destDir, consumerDir, ref.dirStripped, ref.baseDest);
   }
 
   ref.dirDest = path.dirname(ref.dest);
@@ -51,7 +51,7 @@ function normalizeDep(ref) {
     const pagePrefix = forWrapper ? '' : consumerName + '-';
     const webPathPrefix = (forWrapper ? '/' : '') + ref.dirDest;
 
-    ref.dirDest = path.join(config.destBase, ref.dirDest);
+    ref.dirDest = path.join(config.destDir, ref.dirDest);
     ref.filenameDest = pagePrefix + ref.groupKey + ref.extDest;
     ref.dest = path.join(ref.dirDest, ref.filenameDest);
     ref.webPath = path.join(webPathPrefix, ref.filenameDest);
