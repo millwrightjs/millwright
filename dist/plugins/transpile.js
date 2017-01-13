@@ -83,14 +83,9 @@ function coffee(file) {
 }
 
 function js(file) {
-  var presets = function presets(arr) {
-    return arr.map(function (name) {
-      return path.join(__dirname, '../../node_modules/babel-preset-' + name);
-    });
-  };
   var opts = {
     filename: file.base,
-    presets: presets(['es2015']),
+    presets: ['babel-preset-es2015'],
     sourceMaps: true,
     sourceFileName: file.src,
     ast: false,
