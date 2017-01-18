@@ -71,18 +71,18 @@ function make(opts) {
   }
 
   function runTransformAssets(assets) {
-    return _(assets).pipe(plugins.normalizeAsset, !_.get(opts, 'targeted')).pipe(plugins.read).pipe(plugins.transpile, function (a) {
+    return _(assets).flow(plugins.normalizeAsset, !_.get(opts, 'targeted')).flow(plugins.read).flow(plugins.transpile, function (a) {
       return !a.isMinified;
-    }).pipeTap(plugins.cacheImport, function (a) {
+    }).flowTap(plugins.cacheImport, function (a) {
       return !a.isMinified;
-    }).pipe(plugins.copySource).pipe(plugins.minify, function (a) {
+    }).flow(plugins.copySource).flow(plugins.minify, function (a) {
       return !a.isMinified;
-    }, task === 'build').pipe(plugins.remapSources, function (a) {
+    }, task === 'build').flow(plugins.remapSources, function (a) {
       return a.map;
     }).value();
   }
 
   function runGenerateDeps(deps) {
-    return _(deps).pipe(plugins.normalizeDep).pipe(plugins.getAssetContent).pipeAll(plugins.concat, task === 'build').pipe(plugins.outputSourcemaps).pipe(plugins.output).value();
+    return _(deps).flow(plugins.normalizeDep).flow(plugins.getAssetContent).flowAll(plugins.concat, task === 'build').flow(plugins.outputSourcemaps).flow(plugins.output).value();
   }
 }

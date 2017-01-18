@@ -11,7 +11,7 @@ process.on('unhandledRejection', function (e) {
 });
 
 require('./utils/lodash-utils');
-require('./utils/lodash-pipes');
+require('./utils/lodash-flow');
 var argv = require('yargs').argv;
 var requireDir = require('require-dir');
 var tasks = requireDir('./tasks', { camelcase: true });

@@ -69,23 +69,23 @@ function make(opts) {
 
   function runTransformAssets(assets) {
     return _(assets)
-      .pipe(plugins.normalizeAsset, !_.get(opts, 'targeted'))
-      .pipe(plugins.read)
-      .pipe(plugins.transpile, a => !a.isMinified)
-      .pipeTap(plugins.cacheImport, a => !a.isMinified)
-      .pipe(plugins.copySource)
-      .pipe(plugins.minify, a => !a.isMinified, task === 'build')
-      .pipe(plugins.remapSources, a => a.map)
+      .flow(plugins.normalizeAsset, !_.get(opts, 'targeted'))
+      .flow(plugins.read)
+      .flow(plugins.transpile, a => !a.isMinified)
+      .flowTap(plugins.cacheImport, a => !a.isMinified)
+      .flow(plugins.copySource)
+      .flow(plugins.minify, a => !a.isMinified, task === 'build')
+      .flow(plugins.remapSources, a => a.map)
       .value();
   }
 
   function runGenerateDeps(deps) {
     return _(deps)
-      .pipe(plugins.normalizeDep)
-      .pipe(plugins.getAssetContent)
-      .pipeAll(plugins.concat, task === 'build')
-      .pipe(plugins.outputSourcemaps)
-      .pipe(plugins.output)
+      .flow(plugins.normalizeDep)
+      .flow(plugins.getAssetContent)
+      .flowAll(plugins.concat, task === 'build')
+      .flow(plugins.outputSourcemaps)
+      .flow(plugins.output)
       .value();
   }
 }
