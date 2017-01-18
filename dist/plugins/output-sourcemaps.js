@@ -11,7 +11,7 @@ module.exports = function outputSourcemaps(file) {
   var mapPath = path.join(config.destDir, 'sourcemaps', file.sourcemapPath);
 
   // Append sourceMappingURL to file
-  var mapUrl = path.relative(file.dirDest, mapPath);
+  var mapUrl = '/' + path.relative(file.dirDest, mapPath);
   var mapUrlStringBase = '# sourceMappingURL=' + mapUrl;
   var mapUrlString = file.typeDest === 'css' ? '/*' + mapUrlStringBase + ' */' : '//' + mapUrlStringBase;
   file.content += _.endsWith(file.content, '\n') ? mapUrlString : '\n' + mapUrlString;
