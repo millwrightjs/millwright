@@ -1,7 +1,7 @@
 {
   "name": "millwright",
   "description": "A zero configuration build tool for the web.",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "homepage": "https://millwrightjs.com",
   "repository": "millwrightjs/millwright",
   "author": "Shawn Erquhart (https://github.com/erquhart)",
