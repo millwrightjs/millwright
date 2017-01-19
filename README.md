@@ -3,7 +3,7 @@
   <a href="https://millwrightjs.com">
     <img
       width="300px"
-      src="https://raw.githubusercontent.com/millwrightjs/millwright/readme/logo.png">
+      src="https://raw.githubusercontent.com/millwrightjs/millwright/master/logo.png">
   </a>
 </p>
 <p align="center">
