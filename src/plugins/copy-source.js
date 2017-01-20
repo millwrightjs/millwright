@@ -1,6 +1,6 @@
 const path = require('path');
-const promisify = require('promisify-node');
-const fs = promisify(require('fs-extra'));
+const bluebird = require('bluebird');
+const fs = bluebird.promisifyAll(require('fs-extra'));
 const _ = require('lodash');
 const config = require('../config');
 const util = require('../utils/util');
@@ -18,7 +18,7 @@ module.exports = function copySource(file) {
   function copyToSourcemaps(sourcePath) {
     const strippedSourcePath = util.stripIgnoredBasePath(sourcePath, config.assetIgnoredBasePaths);
     const sourcemapsPath = path.join(config.destDir, 'sourcemaps', strippedSourcePath);
-    return _.attemptSilent(fs.copy, sourcePath, sourcemapsPath, {dereference: true});
+    return _.attemptSilent(fs.copyAsync, sourcePath, sourcemapsPath, {dereference: true});
   }
 
 }

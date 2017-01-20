@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const path = require('path');
-const promisify = require('promisify-node');
-const fs = promisify(require('fs-extra'));
+const bluebird = require('bluebird');
+const fs = bluebird.promisifyAll(require('fs-extra'));
 const clean = require('./clean');
 const requireDir = require('require-dir');
 const plugins = requireDir('../plugins', {camelcase: true});
@@ -57,12 +57,13 @@ function make(opts) {
             return acc;
           }, []);
         }
-        return Promise.all(_.castArray(runGenerateDeps(deps)));
+        return Promise.all(_.castArray(runGenerateDeps(deps)))
       })
+      .then(result => Promise.all(_.flatten(result)))
       .then(() => {
         return Promise.all(_.filter(assets || cache.get('files'), f => !f.role).map(asset => {
           const dest = path.join(config.destDir, asset.srcStripped);
-          return fs.copy(asset.src, dest);
+          return fs.copyAsync(asset.src, dest);
         }));
       });
   }

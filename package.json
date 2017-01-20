@@ -12,6 +12,7 @@
   "dependencies": {
     "babel-core": "^6.18.2",
     "babel-preset-es2015": "^6.18.0",
+    "bluebird": "^3.4.7",
     "browser-sync": "^2.18.1",
     "chokidar": "^1.6.1",
     "coffee-script": "^1.10.0",
@@ -25,22 +26,24 @@
     "path-exists": "^3.0.0",
     "postcss": "^5.1.2",
     "postcss-cssnext": "^2.8.0",
-    "promisify-node": "^0.4.0",
     "require-dir": "^0.3.1",
     "stylus": "^0.54.5",
     "uglify-js": "^2.7.3",
     "yargs": "^6.4.0"
   },
   "devDependencies": {
+    "ava": "^0.17.0",
     "babel-cli": "^6.18.0",
+    "dir-compare": "^1.3.0",
     "watch": "^1.0.1"
   },
   "engines": {
     "node": ">= 4.0"
   },
   "scripts": {
-    "build": "babel src -d dist --presets es2015",
-    "watch": "watch 'npm run build' src"
+    "build": "babel src -d dist --presets es2015 --source-maps inline",
+    "watch": "watch 'npm run build' src",
+    "test": "ava e2e/*/*.test.js --source dist/utils/util.js"
   },
   "license": "MIT"
 }

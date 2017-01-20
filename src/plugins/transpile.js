@@ -1,6 +1,6 @@
 const path = require('path');
 const _ = require('lodash');
-const promisify = require('promisify-node');
+const bluebird = require('bluebird');
 const _sass = require('node-sass');
 const _less = require('less');
 const _stylus = require('stylus');
@@ -17,7 +17,7 @@ module.exports = function transpile(file) {
 const transpilers = {sass, less, stylus, coffee, js, css};
 
 function sass(file) {
-  return promisify(_sass.render)({
+  return bluebird.promisify(_sass.render)({
     data: file.content,
     file: file.src,
     includePaths: [file.dir],

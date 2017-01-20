@@ -1,10 +1,11 @@
 'use strict';
 
-var promisify = require('promisify-node');
-var fs = promisify(require('fs-extra'));
+var bluebird = require('bluebird');
+var fs = bluebird.promisifyAll(require('fs-extra'));
 
 module.exports = function output(file) {
-  return fs.outputFile(file.dest, file.content).then(function () {
+  return fs.outputFileAsync(file.dest, file.content).then(function () {
     return file;
   });
 };
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uL3NyYy9wbHVnaW5zL291dHB1dC5qcyJdLCJuYW1lcyI6WyJibHVlYmlyZCIsInJlcXVpcmUiLCJmcyIsInByb21pc2lmeUFsbCIsIm1vZHVsZSIsImV4cG9ydHMiLCJvdXRwdXQiLCJmaWxlIiwib3V0cHV0RmlsZUFzeW5jIiwiZGVzdCIsImNvbnRlbnQiLCJ0aGVuIl0sIm1hcHBpbmdzIjoiOztBQUFBLElBQU1BLFdBQVdDLFFBQVEsVUFBUixDQUFqQjtBQUNBLElBQU1DLEtBQUtGLFNBQVNHLFlBQVQsQ0FBc0JGLFFBQVEsVUFBUixDQUF0QixDQUFYOztBQUVBRyxPQUFPQyxPQUFQLEdBQWlCLFNBQVNDLE1BQVQsQ0FBZ0JDLElBQWhCLEVBQXNCO0FBQ3JDLFNBQU9MLEdBQUdNLGVBQUgsQ0FBbUJELEtBQUtFLElBQXhCLEVBQThCRixLQUFLRyxPQUFuQyxFQUE0Q0MsSUFBNUMsQ0FBaUQ7QUFBQSxXQUFNSixJQUFOO0FBQUEsR0FBakQsQ0FBUDtBQUNELENBRkQiLCJmaWxlIjoib3V0cHV0LmpzIiwic291cmNlc0NvbnRlbnQiOlsiY29uc3QgYmx1ZWJpcmQgPSByZXF1aXJlKCdibHVlYmlyZCcpO1xuY29uc3QgZnMgPSBibHVlYmlyZC5wcm9taXNpZnlBbGwocmVxdWlyZSgnZnMtZXh0cmEnKSk7XG5cbm1vZHVsZS5leHBvcnRzID0gZnVuY3Rpb24gb3V0cHV0KGZpbGUpIHtcbiAgcmV0dXJuIGZzLm91dHB1dEZpbGVBc3luYyhmaWxlLmRlc3QsIGZpbGUuY29udGVudCkudGhlbigoKSA9PiBmaWxlKTtcbn1cbiJdfQ==
