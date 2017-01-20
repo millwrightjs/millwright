@@ -12,7 +12,7 @@ const requireDir = require('require-dir');
 const tasks = requireDir('./tasks', {camelcase: true});
 const config = require('./config');
 
-const arg = Object.keys(tasks).includes(argv._[0]) ? argv._[0] : '';
-const cmd = arg || config.defaultCommand;
+const realCmd = Object.keys(tasks).indexOf(argv._[0]) >= 0;
+const cmd = realCmd ? argv._[0] : config.defaultCommand;
 
 module.exports = tasks[cmd];
