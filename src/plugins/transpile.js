@@ -80,7 +80,7 @@ function coffee(file) {
 function js(file) {
   const opts = {
     filename: file.base,
-    presets: ['babel-preset-es2015'],
+    presets: ['babel-preset-es2015', 'babel-preset-es2016', 'babel-preset-es2017'],
     sourceMaps: true,
     sourceFileName: file.src,
     ast: false,
