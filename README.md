@@ -9,6 +9,13 @@
 <p align="center">
   <strong>A zero configuration build tool for the web.</strong>
 </p>
+<hr>
+<p align="center">
+  <a href="https://travis-ci.org/millwrightjs/millwright">
+    <img src="https://travis-ci.org/millwrightjs/millwright.svg?branch=master" alt="Build Status">
+  </a>
+</p>
+<hr>
 
 ## Intro
 Millwright provides the common build functionality that many projects need without requiring any
