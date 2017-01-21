@@ -25,11 +25,14 @@ Please visit [millwrightjs.com](https://millwrightjs.com) for more information, 
 installation.
 
 ## Project status
-Millwright is currently in Alpha. That means that the desired feature set for the 1.0.0 milestone is
-in place, and the project is ready for community involvement.
+Millwright is currently in Alpha. That means that the basic feature set expected for the 1.0.0
+milestone is in place, and that it's generally expected to work as described. Alpha status also
+means that the library is highly untested, and that the project is ready for developer usage and
+contributions via issues and PR's.
 
 Current priorites include:
 
+* Windows support (look for that Appveyor badge soon)
 * Refactoring
 * Error messaging
 * Input validation
@@ -44,7 +47,8 @@ This project does not yet have a formal styleguide. For now, the following consi
 observed when submitting code:
 
 * Communicate via issues and get confirmation before doing anything big
-* Style matters - keep it clean
+* Style matters - keep it clean:q
+* Add or update relevant tests (currently happening in [e2e](https://github.com/millwrightjs/millwright/tree/master/e2e)).
 
 ## Support
 Join the [Gitter chat](https://gitter.im/millwrightjs/millwright) to get (or give) realtime help

@@ -27,9 +27,9 @@ simply contains the project, with whatever files you want to include for your te
 Generally, each test case should run through the `make` and `build` commands, which is accomplished
 via the `<command>.test.js` files. These files are just boilerplate, and will always have the same
 content. This was a quick fix to take advantage of AVA's per-file sub-processing and async/await
-transpiling. The actual test that we're reusing is written in `e2e/run-test.js`. The test file's
-name is used to determine which command to run, so it's generally expected that every case will have
-a `make.test.js` and a `build.test.js`.
+transpiling. The actual test that we're reusing is written in `e2e/setup-src.js`, which is
+transpiled via `e2e/setup.js`. The test file's name is used to determine which command to run, so
+it's generally expected that every case will have a `make.test.js` and a `build.test.js`.
 
 Finally, every test case should have a `dest-<command>snapshot` directory for each
 `<command>.test.js` These directories are just static copies representing the exact `dest` output
