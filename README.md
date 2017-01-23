@@ -47,7 +47,7 @@ This project does not yet have a formal styleguide. For now, the following consi
 observed when submitting code:
 
 * Communicate via issues and get confirmation before doing anything big
-* Style matters - keep it clean:q
+* Style matters - keep it clean
 * Add or update relevant tests (currently happening in [e2e](https://github.com/millwrightjs/millwright/tree/master/e2e)).
 
 ## Support
