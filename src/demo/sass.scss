@@ -1,0 +1,9 @@
+// Setting the font family for the site from this Sass file.
+
+// Imports work too!
+@import 'import.scss';
+
+body,
+button {
+  font-family: $font-family;
+}

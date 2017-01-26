@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <title>millwright.js demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  {[{#assets.styles}]}
+    <link href="{[{.}]}" rel="stylesheet">
+  {[{/assets.styles}]}
+</head>
+
+<body>
+  <header class="container">
+    <h1 class="header-title">millwright.js</h1>
+    <p class="header-subtitle">The easiest build tool you'll ever use.</p>
+  </header>
+  <section class="container project-description">
+    <h1>Thanks for checking out the demo.</h1>
+    <p>
+      Check out the src and dest directories to see what the project looks like, and be sure to
+      see how the sourcemaps work in your dev tools!
+    </p>
+  </section>
+
+  {[{#assets.scripts}]}
+    <script src="{[{.}]}"></script>
+  {[{/assets.scripts}]}
+</body>
