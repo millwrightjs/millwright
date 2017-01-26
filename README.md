@@ -11,14 +11,17 @@
 </p>
 <hr>
 <p align="center">
-  <a href="https://travis-ci.org/millwrightjs/millwright">
-    <img src="https://travis-ci.org/millwrightjs/millwright.svg?branch=master" alt="Build Status">
-  </a>
-  <a href="https://gitter.im/millwrightjs/millwright">
-    <img src="https://badges.gitter.im/join%20chat.svg" alt="Join Gitter Chat">
-  </a>
+  <a href="https://travis-ci.org/millwrightjs/millwright"><img
+    src="https://travis-ci.org/millwrightjs/millwright.svg?branch=master"
+    alt="Build Status"></a>
+  <a href="https://gitter.im/millwrightjs/millwright"><img
+    src="https://badges.gitter.im/join%20chat.svg" alt="Join Gitter Chat"></a>
 </p>
 <hr>
+
+## Star us on GitHub!
+Millwright is brand spanking new - the alpha release was announced at the beginning of the year. If
+you like where the project is headed, star us on GitHub and help spread the word!
 
 ## Get help on Gitter!
 Join the chat on [Gitter](https://gitter.im/millwrightjs/millwright) to get (or give) realtime help
