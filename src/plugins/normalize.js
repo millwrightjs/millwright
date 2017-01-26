@@ -95,7 +95,7 @@ function normalize(paths) {
             // Cache non-assets as files without roles - this allows copying of arbitrary files from
             // above the src directory, eg. font files from the font-awesome npm package
             const type = path.extname(dep).slice(1);
-            if (!activeAssetTypes.includes(type)) {
+            if (activeAssetTypes.indexOf(type) === -1) {
               const normalized = normalizeBase(src);
               cache.set('files', 'srcResolved', normalized);
               return path.join(config.destDir, normalized.srcStripped);
