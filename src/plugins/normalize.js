@@ -10,29 +10,30 @@ const {getType, stripIgnoredBasePath, changeExt, getCompiledType} = require('../
 
 module.exports = normalize;
 
+function normalizeBase(src) {
+  const normalized = path.parse(src);
+  normalized.src = src;
+  normalized.srcResolved = path.resolve(src);
+  normalized.dirResolved = path.dirname(normalized.srcResolved);
+  normalized.srcStripped = stripIgnoredBasePath(src, config.assetIgnoredBasePaths);
+
+  return normalized;
+}
+
 function normalize(paths) {
   const task = process.env.task || 'make';
-  const activeAssetTypes = ['css', 'js', 'coffee', 'less', 'styl', 'sass', 'scss'];
   const srcDirResolved = path.resolve(config.srcDir);
 
   return _(paths)
     .map(src => {
-      const srcResolved = path.resolve(src);
-      const dirResolved = path.dirname(srcResolved);
-      const normalized = path.parse(src);
-      const {dir, base, ext, name} = normalized;
-      const type = _.trimStart(ext, '.');
-      const parentDir = dir.slice(dir.lastIndexOf(path.sep) + path.sep.length);
-
-      normalized.src = src;
-      normalized.srcResolved = srcResolved;
-      normalized.dirResolved = dirResolved;
-      normalized.srcStripped = stripIgnoredBasePath(src, config.assetIgnoredBasePaths);
+      const normalized = normalizeBase(src);
+      const type = _.trimStart(normalized.ext, '.');
+      const parentDir = normalized.dir.slice(normalized.dir.lastIndexOf(path.sep) + path.sep.length);
 
       if (type === 'mustache') {
         if (parentDir === 'partials') {
           normalized.role = 'partial';
-        } else if (name === 'wrapper') {
+        } else if (normalized.name === 'wrapper') {
           normalized.role = 'wrapper';
         } else {
           normalized.role = 'template';
@@ -82,11 +83,24 @@ function normalize(paths) {
       if (file.role === 'data' && file.content.assets) {
         file.content.assets = _.mapValues(file.content.assets, (group, key) => {
           return _(group).map(dep => {
+            const activeAssetTypes = ['css', 'js', 'coffee', 'less', 'styl', 'sass', 'scss'];
             const depIsUrl = ['http://', 'https://', '//'].find(str => dep.startsWith(str));
+
             if (depIsUrl) {
               return dep;
             }
+
             let src = path.join(file.dir, dep);
+
+            // Cache non-assets as files without roles - this allows copying of arbitrary files from
+            // above the src directory, eg. font files from the font-awesome npm package
+            const type = path.extname(dep).slice(1);
+            if (!activeAssetTypes.includes(type)) {
+              const normalized = normalizeBase(src);
+              cache.set('files', 'srcResolved', normalized);
+              return path.join(config.destDir, normalized.srcStripped);
+            }
+
             let ref = path.parse(src);
 
             // Swap in minified src when appropriate (and if exists)
@@ -120,10 +134,10 @@ function normalize(paths) {
     .value();
 }
 
+
 function getWrapper(ref, files, srcRoot) {
   const dir = path.dirname(ref);
   return dir.length >= srcRoot.length && (files.find(f => {
     return _.isMatch(f, {role: 'wrapper', dirResolved: dir});
   }) || getWrapper(dir, files, srcRoot));
 }
-
