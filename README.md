@@ -7,7 +7,7 @@
   </a>
 </p>
 <p align="center">
-  <strong>A zero configuration build tool for the web.</strong>
+  <strong>The easiest build tool you'll ever use.</strong>
 </p>
 <hr>
 <p align="center">
