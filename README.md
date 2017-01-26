@@ -14,8 +14,15 @@
   <a href="https://travis-ci.org/millwrightjs/millwright">
     <img src="https://travis-ci.org/millwrightjs/millwright.svg?branch=master" alt="Build Status">
   </a>
+  <a href="https://gitter.im/millwrightjs/millwright">
+    <img src="https://badges.gitter.im/join%20chat.svg" alt="Join Gitter Chat">
+  </a>
 </p>
 <hr>
+
+## Get help on Gitter!
+Join the chat on [Gitter](https://gitter.im/millwrightjs/millwright) to get (or give) realtime help
+from the community.
 
 ## Intro
 Millwright provides the common build functionality that many projects need without requiring any
@@ -49,10 +56,6 @@ observed when submitting code:
 * Communicate via issues and get confirmation before doing anything big
 * Style matters - keep it clean
 * Add or update relevant tests (currently happening in [e2e](https://github.com/millwrightjs/millwright/tree/master/e2e)).
-
-## Support
-Join the [Gitter chat](https://gitter.im/millwrightjs/millwright) to get (or give) realtime help
-from the community.
 
 ## Building Locally
 The following commands are available for building Millwright locally:
