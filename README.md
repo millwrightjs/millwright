@@ -19,7 +19,7 @@
 </p>
 <hr>
 
-## Star us on GitHub!
+## Give us a star!
 Millwright is brand spanking new - the alpha release was announced at the beginning of the year. If
 you like where the project is headed, star us on GitHub and help spread the word!
 
@@ -27,9 +27,11 @@ you like where the project is headed, star us on GitHub and help spread the word
 Join the chat on [Gitter](https://gitter.im/millwrightjs/millwright) to get (or give) realtime help
 from the community.
 
+<hr>
+
 ## Intro
-Millwright provides the common build functionality that many projects need without requiring any
-setup.
+Millwright provides the common build functionality that many web projects need without any tool
+configuration.
 
 Please visit [millwrightjs.com](https://millwrightjs.com) for more information, including usage and
 installation.
