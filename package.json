@@ -14,6 +14,7 @@
     "babel-preset-es2015": "^6.22.0",
     "babel-preset-es2016": "^6.22.0",
     "babel-preset-es2017": "^6.22.0",
+    "babel-preset-react": "^6.22.0",
     "bluebird": "^3.4.7",
     "browser-sync": "^2.18.1",
     "chokidar": "^1.6.1",
