@@ -46,8 +46,8 @@
   },
   "scripts": {
     "build": "babel src -d dist --presets es2015,es2016,es2017 --source-maps inline --copy-files",
-    "watch": "watch 'npm run build' src",
-    "test": "ava e2e/*/*.test.js --source dist/utils/util.js"
+    "watch": "watch 'npm run build && npm test' src",
+    "test": "ava e2e/*/*.test.js"
   },
   "license": "MIT"
 }
