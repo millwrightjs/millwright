@@ -1,6 +1,8 @@
 const path = require('path');
 const _ = require('lodash');
 const pathExists = require('path-exists').sync;
+const requireDir = require('require-dir');
+const plugins = requireDir('../plugins', {camelcase: true});
 const cache = require('../utils/cache');
 
 module.exports = cacheImport;
@@ -15,8 +17,14 @@ function cacheImport(files) {
           srcResolved: resolved,
           consumer: file.srcResolved
         });
+
         const cached = cache.get('files', resolved);
-        cached.role = cached.role || 'import';
+
+        if (cached) {
+          cached.role = cached.role || 'import';
+        } else {
+          cache.set('files', 'srcResolved', plugins.normalizeBase(source));
+        }
       }
     });
   });

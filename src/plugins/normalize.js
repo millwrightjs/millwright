@@ -10,23 +10,13 @@ const {getType, stripIgnoredBasePath, changeExt, getCompiledType} = require('../
 
 module.exports = normalize;
 
-function normalizeBase(src) {
-  const normalized = path.parse(src);
-  normalized.src = src;
-  normalized.srcResolved = path.resolve(src);
-  normalized.dirResolved = path.dirname(normalized.srcResolved);
-  normalized.srcStripped = stripIgnoredBasePath(src, config.assetIgnoredBasePaths);
-
-  return normalized;
-}
-
 function normalize(paths) {
   const task = process.env.task || 'make';
   const srcDirResolved = path.resolve(config.srcDir);
 
   return _(paths)
     .map(src => {
-      const normalized = normalizeBase(src);
+      const normalized = plugins.normalizeBase(src);
       const type = _.trimStart(normalized.ext, '.');
       const parentDir = normalized.dir.slice(normalized.dir.lastIndexOf(path.sep) + path.sep.length);
 
@@ -96,7 +86,7 @@ function normalize(paths) {
             // above the src directory, eg. font files from the font-awesome npm package
             const type = path.extname(dep).slice(1);
             if (activeAssetTypes.indexOf(type) === -1) {
-              const normalized = normalizeBase(src);
+              const normalized = plugins.normalizeBase(src);
               cache.set('files', 'srcResolved', normalized);
               return path.join(config.destDir, normalized.srcStripped);
             }
