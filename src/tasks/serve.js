@@ -38,7 +38,7 @@ function serve() {
       var shouldMake = false;
       var shouldMakeAll = false;
 
-      if (['asset', 'import', 'wrapper'].includes(file.role)) {
+      if (_.includes(['asset', 'import', 'wrapper'], file.role)) {
         const deps = _(cache.get('deps'))
           .filter({srcResolved: changedPath})
           .map(dep => cache.get('files', dep.consumer))
@@ -67,7 +67,7 @@ function serve() {
       } else if (file.role === 'wrapper') {
         const templates = _.filter(consumers, {role: 'template'});
         templates.forEach(plugins.static);
-      } else if (['partial', 'lambda'].includes(file.role)) {
+      } else if (_.includes(['partial', 'lambda'], file.role)) {
         const opts = {
           shouldGetPartials: file.role === 'partial',
           shouldGetLambdas: file.role === 'lambda'

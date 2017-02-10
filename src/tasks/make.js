@@ -51,7 +51,7 @@ function make(opts) {
         if (assets) {
           const assetSources = _.map(assets, 'srcResolved');
           deps = deps.reduce((acc, dep) => {
-            if (assetSources.includes(dep.srcResolved)) {
+            if (_.includes(assetSources, dep.srcResolved)) {
               acc.push(dep);
             }
             return acc;
