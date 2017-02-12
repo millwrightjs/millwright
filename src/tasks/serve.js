@@ -2,6 +2,8 @@ const path = require('path');
 const _ = require('lodash');
 const chokidar = require('chokidar');
 const bs = require('browser-sync').create();
+const logger = require('connect-logger');
+const historyApiFallback = require('connect-history-api-fallback');
 const config = require('../config');
 const cache = require ('../utils/cache');
 const make = require('./make');
@@ -95,6 +97,10 @@ function serve() {
         extensions: ['html']
       }
     },
+    middleware: [
+      logger(),
+      historyApiFallback()
+    ],
     snippetOptions: {
       rule: {
         match: /$/,
