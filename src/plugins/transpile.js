@@ -81,16 +81,14 @@ function coffee(file) {
 }
 
 function js(file) {
+  // TODO: unhack all the hacking
   const babelOpts = {
     filename: file.base,
     presets: [
-      ['babel-preset-es2015', {modules: false}],
+      ['babel-preset-es2015'],
       'babel-preset-es2016',
       'babel-preset-es2017',
       'babel-preset-react'
-    ],
-    plugins: [
-      'babel-plugin-external-helpers'
     ],
     sourceMaps: true,
     sourceFileName: file.src,
@@ -98,39 +96,39 @@ function js(file) {
     compact: false
   };
 
-  const rollupOpts = {
-    entry: file.src,
-    plugins: [
-      rollupBabel(babelOpts)
-    ]
-  };
+  if (config.modules) {
+    babelOpts.presets[0][1] = {modules: false};
+    babelOpts.plugins = ['babel-plugin-external-helpers'];
 
-  const output = rollup(rollupOpts)
-    .then(bundle => {
-      const temp = bundle.generate({
-        format: 'es',
-        sourceMap: true,
-        sourceMapFile: config.srcDir
-      });
-      const result = {
-        content: temp.code,
-        map: temp.map,
-        mapImports: temp.map.sources
-      };
-      return result;
-    })
-    .catch(result => {console.log(result)});
+    const rollupOpts = {
+      entry: file.src,
+      plugins: [
+        rollupBabel(babelOpts)
+      ]
+    };
 
-  return output;
+    return rollup(rollupOpts)
+      .then(bundle => {
+        const result = bundle.generate({
+          format: config.modules === true ? 'es' : config.modules,
+          sourceMap: true,
+          sourceMapFile: config.srcDir
+        });
+        return {
+          content: result.code,
+          map: result.map,
+          mapImports: result.map.sources
+        };
+      })
+      .catch(result => {console.log(result)});
+  }
 
-  /*
-  const transformed = babel.transform(file.content, opts);
+  const transformed = babel.transform(file.content, babelOpts);
   const result = {
     content: transformed.code,
     map: transformed.map
   };
   return Promise.resolve(result);
-  */
 }
 
 function css(file) {
