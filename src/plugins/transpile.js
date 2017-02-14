@@ -6,8 +6,11 @@ const _less = require('less');
 const _stylus = require('stylus');
 const _coffee = require('coffee-script');
 const babel = require('babel-core');
+const {rollup} = require('rollup');
+const rollupBabel = require('rollup-plugin-babel');
 const postcss = require('postcss');
 const cssnext = require('postcss-cssnext');
+const config = require('../config');
 
 module.exports = function transpile(file) {
   const transpiled = transpilers[file.type](file);
@@ -78,25 +81,56 @@ function coffee(file) {
 }
 
 function js(file) {
-  const opts = {
+  const babelOpts = {
     filename: file.base,
     presets: [
-      'babel-preset-es2015',
+      ['babel-preset-es2015', {modules: false}],
       'babel-preset-es2016',
       'babel-preset-es2017',
       'babel-preset-react'
+    ],
+    plugins: [
+      'babel-plugin-external-helpers'
     ],
     sourceMaps: true,
     sourceFileName: file.src,
     ast: false,
     compact: false
   };
+
+  const rollupOpts = {
+    entry: file.src,
+    plugins: [
+      rollupBabel(babelOpts)
+    ]
+  };
+
+  const output = rollup(rollupOpts)
+    .then(bundle => {
+      const temp = bundle.generate({
+        format: 'es',
+        sourceMap: true,
+        sourceMapFile: config.srcDir
+      });
+      const result = {
+        content: temp.code,
+        map: temp.map,
+        mapImports: temp.map.sources
+      };
+      return result;
+    })
+    .catch(result => {console.log(result)});
+
+  return output;
+
+  /*
   const transformed = babel.transform(file.content, opts);
   const result = {
     content: transformed.code,
     map: transformed.map
   };
   return Promise.resolve(result);
+  */
 }
 
 function css(file) {
