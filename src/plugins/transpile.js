@@ -8,6 +8,8 @@ const _coffee = require('coffee-script');
 const babel = require('babel-core');
 const {rollup} = require('rollup');
 const rollupBabel = require('rollup-plugin-babel');
+const rollupCommonJs = require('rollup-plugin-commonjs');
+const rollupNodeResolve = require('rollup-plugin-node-resolve');
 const postcss = require('postcss');
 const cssnext = require('postcss-cssnext');
 const config = require('../config');
@@ -103,8 +105,11 @@ function js(file) {
     const rollupOpts = {
       entry: file.src,
       plugins: [
-        rollupBabel(babelOpts)
-      ]
+        rollupBabel(babelOpts),
+        rollupNodeResolve(),
+        rollupCommonJs()
+      ],
+      treeshake: false
     };
 
     return rollup(rollupOpts)

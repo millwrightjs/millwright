@@ -35,6 +35,8 @@
     "require-dir": "^0.3.1",
     "rollup": "^0.41.4",
     "rollup-plugin-babel": "^2.7.1",
+    "rollup-plugin-commonjs": "^7.0.0",
+    "rollup-plugin-node-resolve": "^2.0.0",
     "stylus": "^0.54.5",
     "uglify-js": "^2.7.3",
     "yargs": "^6.4.0"
