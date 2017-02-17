@@ -84,6 +84,7 @@ function make(opts) {
     return _(deps)
       .flow(plugins.normalizeDep)
       .flow(plugins.getAssetContent)
+      .flowLog()
       .flowAll(plugins.concat, task === 'build')
       .flow(plugins.outputSourcemaps)
       .flow(plugins.output)

@@ -10,6 +10,7 @@ const {rollup} = require('rollup');
 const rollupBabel = require('rollup-plugin-babel');
 const rollupCommonJs = require('rollup-plugin-commonjs');
 const rollupNodeResolve = require('rollup-plugin-node-resolve');
+const rollupReplace = require('rollup-plugin-replace');
 const postcss = require('postcss');
 const cssnext = require('postcss-cssnext');
 const config = require('../config');
@@ -101,15 +102,19 @@ function js(file) {
   if (config.modules) {
     babelOpts.presets[0][1] = {modules: false};
     babelOpts.plugins = ['babel-plugin-external-helpers'];
+    babelOpts.exclude = 'node_modules/**';
+
+    const env = process.env.task === 'build' ? 'production' : 'development';
 
     const rollupOpts = {
       entry: file.src,
       plugins: [
         rollupBabel(babelOpts),
         rollupNodeResolve(),
-        rollupCommonJs()
+        rollupCommonJs({namedExports: config.rollupNamedExports || {}}),
+        rollupReplace({'process.env.NODE_ENV': JSON.stringify(env)})
       ],
-      treeshake: false
+      external: config.rollupExternal || []
     };
 
     return rollup(rollupOpts)
