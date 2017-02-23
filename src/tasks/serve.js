@@ -98,8 +98,7 @@ function serve() {
       }
     },
     middleware: [
-      logger(),
-      historyApiFallback()
+      logger()
     ],
     snippetOptions: {
       rule: {
