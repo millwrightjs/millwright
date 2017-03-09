@@ -90,6 +90,12 @@ function serve() {
     });
   }
 
+  const bsMiddleware = [logger()];
+
+  if (config.spaRouting) {
+    bsMiddleware.push(historyApiFallback());
+  }
+
   const bsOpts = {
     server: {
       baseDir: config.destDir,
@@ -97,10 +103,7 @@ function serve() {
         extensions: ['html']
       }
     },
-    middleware: [
-      logger(),
-      historyApiFallback()
-    ],
+    middleware: bsMiddleware,
     snippetOptions: {
       rule: {
         match: /$/,
