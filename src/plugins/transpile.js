@@ -105,8 +105,14 @@ function js(file) {
     main: true
   };
 
+  const commonJsOpts = {};
+
   if (config.modules) {
     babelOpts.presets[0][1] = {modules: false};
+
+    if (config.namedExports) {
+      Object.assign(commonJsOpts, {namedExports: config.namedExports});
+    }
 
     const rollupOpts = {
       entry: file.src,
@@ -118,7 +124,7 @@ function js(file) {
         // Rollup won't take Millwright forward because it can't consume modules
         // without configuration - manually adding namedExports is often a requirement.
         // Webpack's Node API is probably our only path forward.
-        rollupCommonJs({namedExports: {'react': ['PropTypes']}}),
+        rollupCommonJs(commonJsOpts),
         rollupBabel(babelOpts)
       ]
     };
