@@ -10,6 +10,7 @@ const {rollup} = require('rollup');
 const rollupBabel = require('rollup-plugin-babel');
 const rollupCommonJs = require('rollup-plugin-commonjs');
 const rollupNodeResolve = require('rollup-plugin-node-resolve');
+const rollupEnv = require('rollup-plugin-env');
 const postcss = require('postcss');
 const cssnext = require('postcss-cssnext');
 const config = require('../config');
@@ -98,18 +99,28 @@ function js(file) {
     compact: false
   };
 
+  const nodeResolveOpts = {
+    browser: true,
+    jsnext: true,
+    main: true
+  };
+
   if (config.modules) {
     babelOpts.presets[0][1] = {modules: false};
-    babelOpts.plugins = ['babel-plugin-external-helpers'];
 
     const rollupOpts = {
       entry: file.src,
       plugins: [
-        rollupBabel(babelOpts),
-        rollupNodeResolve(),
-        rollupCommonJs()
-      ],
-      treeshake: false
+        rollupEnv({NODE_ENV: 'production'}),
+        rollupNodeResolve(nodeResolveOpts),
+
+        // Leaving this as a working example for a react/react-router app, but
+        // Rollup won't take Millwright forward because it can't consume modules
+        // without configuration - manually adding namedExports is often a requirement.
+        // Webpack's Node API is probably our only path forward.
+        rollupCommonJs({namedExports: {'react': ['PropTypes']}}),
+        rollupBabel(babelOpts)
+      ]
     };
 
     return rollup(rollupOpts)
@@ -125,7 +136,7 @@ function js(file) {
           mapImports: result.map.sources
         };
       })
-      .catch(result => {console.log(result)});
+      .catch(err => console.log(err));
   }
 
   const transformed = babel.transform(file.content, babelOpts);
